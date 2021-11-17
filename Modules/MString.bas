@@ -47,17 +47,17 @@ Public Function RecursiveReplace(ByVal Expression As String, ByVal Find As Strin
     End If
 End Function
 
-Public Function RecursiveReplaceSL(ByVal Expression As String, ByVal Find As String, ByVal Replace As String, Optional ByVal Start As Long = 1, Optional ByVal Length As Long = -1) As String
+Public Function RecursiveReplaceSL(ByVal Expression As String, ByVal Find As String, ByVal Replace As String, Optional ByVal Start As Long = 1, Optional ByVal length As Long = -1) As String
     'Uses RecursiveReplace to replace "Find" by "Replace" in a part of "Expression" that starts with "Start" with the length of "Length"
     'check input parameters return early if necessary
-    If Length < 0 And Start = 1 Then RecursiveReplaceSL = RecursiveReplace(Expression, Find, Replace): Exit Function
+    If length < 0 And Start = 1 Then RecursiveReplaceSL = RecursiveReplace(Expression, Find, Replace): Exit Function
     Dim le As Long: le = Len(Expression)
     If Start < 1 Or le < Start Then Exit Function 'return nothing
-    If Length < 1 Or le < Start + Length Then Length = le - Start + 1
+    If length < 1 Or le < Start + length Then length = le - Start + 1
     
     Dim sl As String: sl = Left$(Expression, Start - 1)
-    Dim sm As String: sm = Mid$(Expression, Start, Length)
-    Dim sr As String: sr = Mid$(Expression, Start + Length)
+    Dim sm As String: sm = Mid$(Expression, Start, length)
+    Dim sr As String: sr = Mid$(Expression, Start + length)
     sm = RecursiveReplace(sm, Find, Replace)
     RecursiveReplaceSL = sl & sm & sr
     'same but shorter and less noise:
@@ -105,7 +105,7 @@ End Function
 '?IndexOf("Dies ist ein String", "ein", 1) = 9
 '?IndexOf("Dies ist ein String", "ein", 2) = 9
 '?IndexOf("Dies ist ein String", "en", 2) = -1
-Public Function IndexOf(s As String, ByVal value As String, Optional ByVal startIndex As Long = 0, Optional ByVal Count As Long = -1, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
+Public Function IndexOf(s As String, ByVal value As String, Optional ByVal startIndex As Long = 0, Optional ByVal count As Long = -1, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
 'Gibt den Null-basierten Index des ersten Vorkommens der angegebenen Zeichenfolge in dieser Instanz an.
 'Die Suche beginnt an einer angegebenen Zeichenpopsition.
 'Rückgabewerte:
@@ -113,9 +113,9 @@ Public Function IndexOf(s As String, ByVal value As String, Optional ByVal start
 'wurde, oder -1 wenn sie nicht gefunden wurde. Wenn value leer ist, wird startindex zurückgegeben.
     If startIndex < 0 Then startIndex = 0
     If Len(s) < startIndex Then startIndex = Len(s)
-    If Count < 0 Then Count = Len(s) - startIndex
-    If Len(s) < startIndex + Count - 1 Then Count = Len(s) - startIndex
-    Dim v As String: v = MidB(s, startIndex + 1, (Count + 1) * 2)
+    If count < 0 Then count = Len(s) - startIndex
+    If Len(s) < startIndex + count - 1 Then count = Len(s) - startIndex
+    Dim v As String: v = MidB(s, startIndex + 1, (count + 1) * 2)
     IndexOf = InStr(1, v, value, Compare) - 1
     If IndexOf > 0 Then IndexOf = startIndex + IndexOf - 1
 End Function
@@ -124,7 +124,7 @@ Public Function Insert(s As String, ByVal startIndex As Long, ByVal value As Str
     '
 End Function
 
-Public Function LastIndexOf(s As String, value As String, ByVal startIndex As Long, ByVal Count As Long, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
+Public Function LastIndexOf(s As String, value As String, ByVal startIndex As Long, ByVal count As Long, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
     '
 End Function
 
@@ -236,3 +236,29 @@ End Function
 '
 'End Function
 
+Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal count As Long = -1) As String
+    'Remove(Int32, Int32)
+    'Gibt eine neue Zeichenfolge zurück, in der eine bestimmte Anzahl von Zeichen in
+    'der aktuellen Instanz, beginnend an einer angegebenen Position, gelöscht wurden.
+    'Remove (Int32)
+    'Gibt eine neue Zeichenfolge zurück, in der alle Zeichen in der aktuellen Instanz,
+    'beginnend an einer angegebenen Position und sich über die letzte Position
+    'fortsetzend, gelöscht wurden.
+    
+End Function
+
+'Public Function Replace() As String
+'    '
+'End Function
+
+Public Function StartsWith(s As String, ByVal value As String) As Boolean
+    '
+End Function
+
+Public Function Substring(s As String, Optional ByVal startIndex As Long, Optional ByVal length As Long) As String
+    '
+End Function
+
+Public Function ToCharArray(ByVal startIndex As Long, ByVal length As Long) As Integer()
+    '
+End Function
