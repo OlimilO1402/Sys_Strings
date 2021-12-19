@@ -72,32 +72,41 @@ Public Function BoolToYesNo(ByVal b As Boolean) As String
     BoolToYesNo = IIf(b, " Ja ", "Nein")
 End Function
 
-Public Function Double_TryParse(s As String, d_out As Double) As Boolean
+Public Function Double_TryParse(ByVal Value As String, ByRef d_out As Double) As Boolean
 Try: On Error GoTo Catch
-    s = Replace(s, ",", ".")
-    d_out = Val(s)
+    Value = Replace(Value, ",", ".")
+    d_out = Val(Value)
     Double_TryParse = True
 Catch:
 End Function
 
-Public Function Hex2(ByVal value As Byte) As String
-    Hex2 = Hex(value): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
+Public Function Single_TryParse(ByVal Value As String, ByRef s_out As Single) As Boolean
+Try: On Error GoTo Catch
+    Value = Replace(Value, ",", ".")
+    s_out = CSng(Val(Value))
+    Single_TryParse = True
+    Exit Function
+Catch:
 End Function
 
-Public Function Hex4(ByVal value As Integer) As String
-    Hex4 = Hex(value): If Len(Hex4) < 4 Then Hex4 = String(4 - Len(Hex4), "0") & Hex4
+Public Function Hex2(ByVal Value As Byte) As String
+    Hex2 = Hex(Value): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
 
-Public Function Hex8(ByVal value As Long) As String
-    Hex8 = Hex(value): If Len(Hex8) < 8 Then Hex8 = String(8 - Len(Hex8), "0") & Hex8
+Public Function Hex4(ByVal Value As Integer) As String
+    Hex4 = Hex(Value): If Len(Hex4) < 4 Then Hex4 = String(4 - Len(Hex4), "0") & Hex4
 End Function
 
-Public Function Contains(s As String, ByVal value As String) As Boolean
-    Contains = InStr(1, s, value) > 0
+Public Function Hex8(ByVal Value As Long) As String
+    Hex8 = Hex(Value): If Len(Hex8) < 8 Then Hex8 = String(8 - Len(Hex8), "0") & Hex8
 End Function
 
-Public Function EndsWith(s As String, ByVal value As String) As Boolean
-    EndsWith = value = Left$(s, Len(value))
+Public Function Contains(s As String, ByVal Value As String) As Boolean
+    Contains = InStr(1, s, Value) > 0
+End Function
+
+Public Function EndsWith(s As String, ByVal Value As String) As Boolean
+    EndsWith = Value = Left$(s, Len(Value))
 End Function
 
 '?IndexOf("Dies ist ein String", "ein") = 9
@@ -105,7 +114,7 @@ End Function
 '?IndexOf("Dies ist ein String", "ein", 1) = 9
 '?IndexOf("Dies ist ein String", "ein", 2) = 9
 '?IndexOf("Dies ist ein String", "en", 2) = -1
-Public Function IndexOf(s As String, ByVal value As String, Optional ByVal startIndex As Long = 0, Optional ByVal count As Long = -1, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
+Public Function IndexOf(s As String, ByVal Value As String, Optional ByVal startIndex As Long = 0, Optional ByVal Count As Long = -1, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
 'Gibt den Null-basierten Index des ersten Vorkommens der angegebenen Zeichenfolge in dieser Instanz an.
 'Die Suche beginnt an einer angegebenen Zeichenpopsition.
 'Rückgabewerte:
@@ -113,18 +122,18 @@ Public Function IndexOf(s As String, ByVal value As String, Optional ByVal start
 'wurde, oder -1 wenn sie nicht gefunden wurde. Wenn value leer ist, wird startindex zurückgegeben.
     If startIndex < 0 Then startIndex = 0
     If Len(s) < startIndex Then startIndex = Len(s)
-    If count < 0 Then count = Len(s) - startIndex
-    If Len(s) < startIndex + count - 1 Then count = Len(s) - startIndex
-    Dim v As String: v = MidB(s, startIndex + 1, (count + 1) * 2)
-    IndexOf = InStr(1, v, value, Compare) - 1
+    If Count < 0 Then Count = Len(s) - startIndex
+    If Len(s) < startIndex + Count - 1 Then Count = Len(s) - startIndex
+    Dim v As String: v = MidB(s, startIndex + 1, (Count + 1) * 2)
+    IndexOf = InStr(1, v, Value, Compare) - 1
     If IndexOf > 0 Then IndexOf = startIndex + IndexOf - 1
 End Function
 
-Public Function Insert(s As String, ByVal startIndex As Long, ByVal value As String) As String
+Public Function Insert(s As String, ByVal startIndex As Long, ByVal Value As String) As String
     '
 End Function
 
-Public Function LastIndexOf(s As String, value As String, ByVal startIndex As Long, ByVal count As Long, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
+Public Function LastIndexOf(s As String, Value As String, ByVal startIndex As Long, ByVal Count As Long, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
     '
 End Function
 
@@ -236,7 +245,7 @@ End Function
 '
 'End Function
 
-Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal count As Long = -1) As String
+Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Count As Long = -1) As String
     'Remove(Int32, Int32)
     'Gibt eine neue Zeichenfolge zurück, in der eine bestimmte Anzahl von Zeichen in
     'der aktuellen Instanz, beginnend an einer angegebenen Position, gelöscht wurden.
@@ -251,7 +260,7 @@ End Function
 '    '
 'End Function
 
-Public Function StartsWith(s As String, ByVal value As String) As Boolean
+Public Function StartsWith(s As String, ByVal Value As String) As Boolean
     '
 End Function
 
