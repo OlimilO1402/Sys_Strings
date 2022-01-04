@@ -1,6 +1,7 @@
 Attribute VB_Name = "MString"
 Option Explicit 'Zeilen: 129
 
+'String-Routinen
 Public Function DeleteMultiWS(s As String) As String
     'Replace Recursive Delete Multi WhiteSpace WS
     DeleteMultiWS = Trim$(s)
@@ -17,7 +18,6 @@ Public Function DeleteCRLF(s As String) As String
     DeleteCRLF = DeleteCRLF(DeleteCRLF)
 End Function
 
-'String-Routinen
 Public Function RemoveChars(ByVal this As String, CharsToRemove As String) As String
     Dim c As String
     Dim i As Long
@@ -31,7 +31,7 @@ Public Function RemoveChars(ByVal this As String, CharsToRemove As String) As St
 End Function
 
 Public Function RecursiveReplace(ByVal Expression As String, ByVal Find As String, ByVal Replace As String) As String
-    'Returns a string where alle occurances of "Find" in "Expression" are replaced by "Replace".
+    'Returns a string where all occurances of "Find" in "Expression" are replaced by "Replace".
     'RecursivReplace removes multi Backslashes at once e.g. to replace „\\“ by „\“
     'a normal Replace("C:\\\test\\\path\\\dir\\\file.txt", "\\", "\") returns „C:\\test\\path\\dir\\file.txt“
     ' RecursivReplace("C:\\\test\\\path\\\dir\\\file.txt", "\\", "\") returns „C:\test\path\dir\file.txt“
@@ -65,8 +65,7 @@ Public Function RecursiveReplaceSL(ByVal Expression As String, ByVal Find As Str
 End Function
 
 
-' String
-
+'Converters to or from String
 'Bool
 Public Function BoolToYesNo(ByVal b As Boolean) As String
     BoolToYesNo = IIf(b, " Ja ", "Nein")
@@ -135,6 +134,12 @@ End Function
 
 Public Function LastIndexOf(s As String, Value As String, ByVal startIndex As Long, ByVal Count As Long, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
     '
+End Function
+
+Public Function GetDecimalSeparator() As String
+    Dim d As Double, s As String
+    s = Format(d, "0.0")
+    GetDecimalSeparator = Mid(s, 2, 1)
 End Function
 
 Function PadLeft(this As String, _
