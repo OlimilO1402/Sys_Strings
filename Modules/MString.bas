@@ -1,5 +1,59 @@
 Attribute VB_Name = "MString"
-Option Explicit 'Zeilen: 129
+Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336;
+#If VBA7 = 0 Then
+    Private Enum LongPtr
+        [_]
+    End Enum
+#End If
+Private Declare Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
+Private Declare Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
+Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
+Private Declare Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
+
+Private Function Trim0(ByVal s As String) As String
+    Trim0 = VBA.Strings.Trim$(Left$(s, lstrlenW(ByVal StrPtr(s))))
+End Function
+
+'Private Function Ptr2String(ByVal pStr As LongPtr) As String
+'    If pStr = 0 Then Exit Function
+'    Dim l As Long: l = lstrlenW(pStr) * 2& - 1&
+'    If l > 0& Then
+'        ReDim bBuffer(l) As Byte
+'        RtlMoveMemory bBuffer(0), ByVal pStr, l
+'        CoTaskMemFree lpStrPointer
+'        Ptr2String = bBuffer
+'    End If
+'End Function
+
+Private Function PtrToString(ByVal pStr As LongPtr, Optional ByVal sLen As Long) As String
+    If (pStr = 0) Then Exit Function
+    Dim l As Long: l = lstrlenW(pStr)
+    PtrToString = Space$(l)
+    lstrcpyW StrPtr(PtrToString), pStr
+    CoTaskMemFree pStr ' is dass so immer richtig?
+'#If defUnicode Then
+'    'ist es dann schon der richtige String?
+'    'MsgBox PtrToString
+'#Else
+'    PtrToString = Left$(StrConv(PtrToString, vbUnicode), num1)
+'#End If
+End Function
+
+'Dim fnam As String: fnam = Left(lpElfe.lfFontName, lstrlenW(lpElfe.lfFontName(0)))
+
+'Private Function CreateGUID() As String
+'    Dim G As Guid, GuidByt As Long, l As Long, GuidStr As String, Buffer() As Byte
+'    If UuidCreate(G) <> RPC_S_UUID_NO_ADDRESS Then
+'        If UuidToString(G, GuidByt) = RPC_S_OK Then
+'            l = lstrlen(GuidByt)
+'            ReDim Buffer(l - 1) As Byte
+'            RtlMoveMemory Buffer(0), ByVal GuidByt, l
+'            RpcStringFree GuidByt
+'            GuidStr = StrConv(Buffer, vbUnicode)
+'            CreateGUID = UCase$(GuidStr)
+'        End If
+'    End If
+'End Function
 
 'String-Routinen
 Public Function DeleteMultiWS(s As String) As String
@@ -129,7 +183,7 @@ Public Function IndexOf(s As String, ByVal Value As String, Optional ByVal start
 End Function
 
 Public Function Insert(s As String, ByVal startIndex As Long, ByVal Value As String) As String
-    '
+    Insert = Left(s, startIndex) & Value & Mid(s, startIndex)
 End Function
 
 Public Function LastIndexOf(s As String, Value As String, ByVal startIndex As Long, ByVal Count As Long, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
@@ -266,13 +320,15 @@ End Function
 'End Function
 
 Public Function StartsWith(s As String, ByVal Value As String) As Boolean
-    '
+    StartsWith = Left$(s, Len(Value)) = Value
 End Function
 
 Public Function Substring(s As String, Optional ByVal startIndex As Long, Optional ByVal length As Long) As String
-    '
+    Substring = Mid(s, startIndex, length)
 End Function
 
-Public Function ToCharArray(ByVal startIndex As Long, ByVal length As Long) As Integer()
-    '
+Public Function ToCharArray(s As String, ByVal startIndex As Long, ByVal length As Long) As Integer()
+    ReDim CharArray(0 To length - 1) As Integer
+    lstrcpyW VarPtr(CharArray(0)), StrPtr(Mid$(s, startIndex, length))
+    ToCharArray = CharArray
 End Function

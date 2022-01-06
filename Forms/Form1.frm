@@ -1,15 +1,23 @@
 VERSION 5.00
 Begin VB.Form Form1 
    Caption         =   "SysStrings"
-   ClientHeight    =   8055
+   ClientHeight    =   7695
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   13455
    Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   8055
+   ScaleHeight     =   7695
    ScaleWidth      =   13455
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton Command1 
+      Caption         =   "Some Tests"
+      Height          =   375
+      Left            =   120
+      TabIndex        =   27
+      Top             =   7200
+      Width           =   1215
+   End
    Begin VB.TextBox Resizer 
       BorderStyle     =   0  'Kein
       Height          =   255
@@ -306,6 +314,14 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+
+Private Sub Command1_Click()
+    Dim s As String: s = "Dies ist ein Teststring"
+    Dim chars() As Integer
+    chars = MString.ToCharArray(s, 14, 5)
+    MsgBox ChrW(chars(0)) & " " & ChrW(chars(1)) & " " & ChrW(chars(2)) & " " & ChrW(chars(3)) & " " & ChrW(chars(4))
+    If MString.StartsWith(s, "Dies") Then MsgBox "Yes, String s starts with ""Dies"""
+End Sub
 
 Private Sub Form_Load()
     BtnResetDeleteMultiWS_Click
