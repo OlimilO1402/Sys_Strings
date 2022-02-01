@@ -1,16 +1,16 @@
 Attribute VB_Name = "MString"
 Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336;
 #If VBA7 = 0 Then
-    Private Enum LongPtr
-        [_]
-    End Enum
+    'Private Enum LongPtr
+    '    [_]
+    'End Enum
 #End If
 Private Declare Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
 Private Declare Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
 Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
 Private Declare Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
 
-Private Function Trim0(ByVal s As String) As String
+Public Function Trim0(ByVal s As String) As String
     Trim0 = VBA.Strings.Trim$(Left$(s, lstrlenW(ByVal StrPtr(s))))
 End Function
 
@@ -25,10 +25,10 @@ End Function
 '    End If
 'End Function
 
-Private Function PtrToString(ByVal pStr As LongPtr, Optional ByVal sLen As Long) As String
+Public Function PtrToString(ByVal pStr As LongPtr, Optional ByVal sLen As Long) As String
     If (pStr = 0) Then Exit Function
-    Dim l As Long: l = lstrlenW(pStr)
-    PtrToString = Space$(l)
+    Dim L As Long: L = lstrlenW(pStr)
+    PtrToString = Space$(L)
     lstrcpyW StrPtr(PtrToString), pStr
     CoTaskMemFree pStr ' is dass so immer richtig?
 '#If defUnicode Then
@@ -118,6 +118,15 @@ Public Function RecursiveReplaceSL(ByVal Expression As String, ByVal Find As Str
     'RecursiveReplaceSL = Left$(Expression, Start - 1) & RecursiveReplace(Mid$(Expression, Start, Length)) & Mid$(Expression, Start, Length)
 End Function
 
+'used by StringClean in MIBANUtil
+Public Function ReplaceAll(ByVal Expression As String, Find As String, Replace As String) As String
+    Dim i As Integer
+    For i = 1 To Len(Expression)
+        Expression = VBA.Replace(Expression, Mid(Find, i, 1), Replace)
+    Next
+    ReplaceAll = Expression
+End Function
+
 
 'Converters to or from String
 'Bool
@@ -196,9 +205,7 @@ Public Function GetDecimalSeparator() As String
     GetDecimalSeparator = Mid(s, 2, 1)
 End Function
 
-Function PadLeft(this As String, _
-                 ByVal totalWidth As Long, _
-                 Optional ByVal paddingChar As String) As String
+Function PadLeft(this As String, ByVal totalWidth As Long, Optional ByVal paddingChar As String) As String
     
     ' Returns the String StrVal with the specified length.
     ' totalWidth: the length of the returned string
@@ -227,9 +234,7 @@ Function PadLeft(this As String, _
     End If
 End Function
 
-Function PadRight(this As String, _
-                  ByVal totalWidth As Long, _
-                  Optional ByVal paddingChar As String) As String
+Function PadRight(this As String, ByVal totalWidth As Long, Optional ByVal paddingChar As String) As String
     
     ' Returns the String StrVal with the specified length.
     ' totalWidth: the length of the returned string
