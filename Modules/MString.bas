@@ -27,10 +27,10 @@ End Function
 
 Public Function PtrToString(ByVal pStr As LongPtr, Optional ByVal sLen As Long) As String
     If (pStr = 0) Then Exit Function
-    Dim L As Long: L = lstrlenW(pStr)
+    If sLen <= 0 Then sLen = lstrlenW(pStr)
     PtrToString = Space$(L)
     lstrcpyW StrPtr(PtrToString), pStr
-    CoTaskMemFree pStr ' is dass so immer richtig?
+    CoTaskMemFree pStr ' is das so immer richtig?
 '#If defUnicode Then
 '    'ist es dann schon der richtige String?
 '    'MsgBox PtrToString
