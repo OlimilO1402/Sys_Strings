@@ -28,8 +28,21 @@ End Function
 Public Function PtrToString(ByVal pStr As LongPtr, Optional ByVal sLen As Long) As String
     If (pStr = 0) Then Exit Function
     If sLen <= 0 Then sLen = lstrlenW(pStr)
-    PtrToString = Space$(L)
+    PtrToString = Space$(sLen)
     lstrcpyW StrPtr(PtrToString), pStr
+    'CoTaskMemFree pStr ' is das so immer richtig?
+'#If defUnicode Then
+'    'ist es dann schon der richtige String?
+'    'MsgBox PtrToString
+'#Else
+'    PtrToString = Left$(StrConv(PtrToString, vbUnicode), num1)
+'#End If
+End Function
+Public Function PtrToStringCo(ByVal pStr As LongPtr, Optional ByVal sLen As Long) As String
+    If (pStr = 0) Then Exit Function
+    If sLen <= 0 Then sLen = lstrlenW(pStr)
+    PtrToStringCo = Space$(sLen)
+    lstrcpyW StrPtr(PtrToStringCo), pStr
     CoTaskMemFree pStr ' is das so immer richtig?
 '#If defUnicode Then
 '    'ist es dann schon der richtige String?
@@ -37,6 +50,19 @@ Public Function PtrToString(ByVal pStr As LongPtr, Optional ByVal sLen As Long) 
 '#Else
 '    PtrToString = Left$(StrConv(PtrToString, vbUnicode), num1)
 '#End If
+End Function
+
+Public Function IsHex(s As String) As Boolean
+    Dim i As Long
+    For i = 1 To Len(s)
+        Select Case Asc(Mid(s, i, 1))
+        Case 48 To 57:  ' 0 - 9 OK weiter
+        Case 65 To 70:  ' A - F OK weiter
+        Case 97 To 102: ' a - f OK weiter
+        Case Else: Exit Function
+        End Select
+    Next
+    IsHex = True
 End Function
 
 'Dim fnam As String: fnam = Left(lpElfe.lfFontName, lstrlenW(lpElfe.lfFontName(0)))
@@ -196,7 +222,8 @@ Public Function Insert(s As String, ByVal startIndex As Long, ByVal Value As Str
 End Function
 
 Public Function LastIndexOf(s As String, Value As String, ByVal startIndex As Long, ByVal Count As Long, Optional ByVal Compare As VbCompareMethod = vbBinaryCompare) As Long
-    '
+    Dim pos As Long: pos = InStrRev(s, Value, startIndex, Compare)
+    LastIndexOf = pos
 End Function
 
 Public Function GetDecimalSeparator() As String
