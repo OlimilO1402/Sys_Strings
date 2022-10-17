@@ -1,10 +1,10 @@
 Attribute VB_Name = "MString"
 Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336;
-#If VBA7 = 0 Then
-    'Private Enum LongPtr
-    '    [_]
-    'End Enum
-#End If
+'#If VBA7 = 0 Then
+'    Private Enum LongPtr
+'        [_]
+'    End Enum
+'#End If
 Private Declare Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
 Private Declare Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
 Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
