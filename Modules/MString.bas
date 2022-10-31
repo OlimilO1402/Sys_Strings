@@ -1,5 +1,8 @@
 Attribute VB_Name = "MString"
 Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336;
+
+#Const Unicode = 1
+
 '#If VBA7 = 0 Then
 '    Private Enum LongPtr
 '        [_]
@@ -9,6 +12,25 @@ Private Declare Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As 
 Private Declare Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
 Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
 Private Declare Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
+
+'VB does automatic in and out Ansi/Unicode conversion when calling winapi-functions with parameters of type String
+'you can simulate this behaviour by using StrPtrWA in the call and WACorr afterwards
+Public Function StrPtrWA(ByRef s_inout As String) As LongPtr
+#If Unicode Then
+    StrPtrWA = StrPtr(s_inout)
+#Else
+    s_inout = StrConv(s_inout, vbFromUnicode)
+    StrPtrWA = StrPtr(s_inout)
+#End If
+End Function
+
+Public Sub WACorr(ByRef s_inout As String)
+#If Unicode Then
+    '
+#Else
+    s_inout = StrConv(s_inout, vbUnicode)
+#End If
+End Sub
 
 Public Function Trim0(ByVal s As String) As String
     Trim0 = VBA.Strings.Trim$(Left$(s, lstrlenW(ByVal StrPtr(s))))
@@ -116,8 +138,8 @@ Public Function RecursiveReplace(ByVal Expression As String, ByVal Find As Strin
     'a normal Replace("C:\\\test\\\path\\\dir\\\file.txt", "\\", "\") returns „C:\\test\\path\\dir\\file.txt“
     ' RecursivReplace("C:\\\test\\\path\\\dir\\\file.txt", "\\", "\") returns „C:\test\path\dir\file.txt“
     
-    Dim pos As Long: pos = InStr(1, Expression, Find)
-    If pos Then
+    Dim Pos As Long: Pos = InStr(1, Expression, Find)
+    If Pos Then
         Dim r As String: r = VBA.Replace(Expression, Find, Replace)
         'check for stack overflow:
         If (r = Expression) Or (Len(Expression) < Len(r)) Then RecursiveReplace = r: Exit Function
@@ -160,10 +182,52 @@ Public Function BoolToYesNo(ByVal b As Boolean) As String
     BoolToYesNo = IIf(b, " Ja ", "Nein")
 End Function
 
+Public Function StrToBol(ByVal s As String) As Boolean
+    s = UCase$(Trim$(s))
+    If s = "yes" Then StrToBol = True: Exit Function
+    If s = "ja" Then StrToBol = True: Exit Function
+    If s = "ok" Then StrToBol = True: Exit Function
+    If s = "1" Then StrToBol = True: Exit Function
+    If s = "-1" Then StrToBol = True: Exit Function
+    If s = "wahr" Then StrToBol = True: Exit Function
+    If s = "true" Then StrToBol = True: Exit Function
+    StrToBol = CBool(s)
+End Function
+
+'Private Function StrToBol(StrVal As String) As Boolean
+'    If (StrComp(StrVal, "0", vbTextCompare) = 0) Or _
+'       (StrComp(StrVal, "false", vbTextCompare) = 0) Or _
+'       (StrComp(StrVal, "falsch", vbTextCompare) = 0) Or _
+'       (StrComp(StrVal, "nein", vbTextCompare) = 0) Then
+'        StrToBol = False
+'    'ElseIf (StrComp(StrVal, vbNullString) = 0) Or _
+'           (StrComp(StrVal, "1") = 0) Or _
+'           (StrComp(StrVal, "-1") = 0) Or _
+'           (StrComp(StrVal, "true") = 0) Or _
+'           (StrComp(StrVal, "wahr") = 0) Or _
+'           (StrComp(StrVal, "ja") = 0) Then
+'    Else
+'        StrToBol = True
+'    End If
+'End Function
+
+Public Function BolToStr(ByVal b As Boolean) As String
+    If b Then BolToStr = "True" Else BolToStr = "False"
+End Function
+
+
+
+
+
+
+
+
+
+
 Public Function Double_TryParse(ByVal Value As String, ByRef d_out As Double) As Boolean
 Try: On Error GoTo Catch
     Value = Replace(Value, ",", ".")
-    d_out = Val(Value)
+    d_out = val(Value)
     Double_TryParse = True
 Catch:
 End Function
@@ -171,7 +235,7 @@ End Function
 Public Function Single_TryParse(ByVal Value As String, ByRef s_out As Single) As Boolean
 Try: On Error GoTo Catch
     Value = Replace(Value, ",", ".")
-    s_out = CSng(Val(Value))
+    s_out = CSng(val(Value))
     Single_TryParse = True
     Exit Function
 Catch:
@@ -222,8 +286,8 @@ Public Function Insert(s As String, ByVal startIndex As Long, ByVal Value As Str
 End Function
 
 Public Function LastIndexOf(s As String, Value As String, ByVal startIndex As Long, ByVal Count As Long, Optional ByVal compare As VbCompareMethod = vbBinaryCompare) As Long
-    Dim pos As Long: pos = InStrRev(s, Value, startIndex, compare)
-    LastIndexOf = pos
+    Dim Pos As Long: Pos = InStrRev(s, Value, startIndex, compare)
+    LastIndexOf = Pos
 End Function
 
 Public Function GetDecimalSeparator() As String
@@ -336,6 +400,30 @@ End Function
 '
 'End Function
 
+'Dim s As String = "Dies ist ein String"
+'Remove(startIndex, count)
+'s = s.Remove(-1)     ' "" und Fehlermeldung
+'s = s.Remove(0)      ' ""
+'s = s.Remove(10)     ' "Dies ist e"
+'s = s.Remove(19)     ' "Dies ist ein String"
+'s = s.Remove(20)     ' "Dies ist ein String"  und Fehlermeldung
+
+'s = s.Remove(-1, 0)  ' "" und Fehlermeldung
+'s = s.Remove(0, 0)   ' "Dies ist ein String"
+'s = s.Remove(10, 0)  ' "Dies ist ein String"
+'s = s.Remove(19, 0)  ' "Dies ist ein String"
+'s = s.Remove(20, 0)  ' "Dies ist ein String"  und Fehlermeldung
+
+'s = s.Remove(-1, 10) ' "" und Fehlermeldung
+'s = s.Remove(0, 10)  ' "in String"
+'s = s.Remove(1, 10)  ' "Dn String"
+'s = s.Remove(7, 6)   ' "Dies isString"
+'s = s.Remove(10, 9)  ' "Dies ist e"
+'s = s.Remove(10, 10) ' "Dies ist e" und Fehlermeldung
+
+'s = s.Remove(-1, 19) ' "" und Fehlermeldung
+'s = s.Remove(0, 19)  ' ""
+'s = s.Remove(1, 19)  ' "" und Fehlermeldung
 Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Count As Long = -1) As String
     'Remove(Int32, Int32)
     'Gibt eine neue Zeichenfolge zurück, in der eine bestimmte Anzahl von Zeichen in
@@ -344,12 +432,122 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
     'Gibt eine neue Zeichenfolge zurück, in der alle Zeichen in der aktuellen Instanz,
     'beginnend an einer angegebenen Position und sich über die letzte Position
     'fortsetzend, gelöscht wurden.
-    
+    'ist startindex 1-basiert?
+    'If startIndex = 0 And Count = -1 Then
+    'Dim pos As Long: pos = Len(s) - startIndex
+    Dim L As Long: L = Len(s)
+    If Count < 0 Then
+        If startIndex < 0 Then
+            Remove = ""
+            'Error message
+            Exit Function
+        End If
+        If startIndex = 0 Then
+            Remove = ""
+            Exit Function
+        End If
+        If startIndex < L Then
+            Remove = Left$(s, startIndex)
+            Exit Function
+        End If
+        If startIndex = L Then
+            Remove = s
+            Exit Function
+        End If
+        Remove = s
+        'Error message
+        Exit Function
+    End If
+    If Count = 0 Then
+        If startIndex < 0 Then
+            Remove = ""
+            'Error message
+            Exit Function
+        End If
+        If startIndex = 0 Then
+            Remove = s
+            Exit Function
+        End If
+        If startIndex < L Then
+            Remove = s
+            Exit Function
+        End If
+        If startIndex = L Then
+            Remove = s
+            Exit Function
+        End If
+        Remove = s
+        'Error message
+        Exit Function
+    End If
+    If Count < L Then
+        If startIndex < 0 Then
+            Remove = ""
+            'Error message
+            Exit Function
+        End If
+        If startIndex = 0 Then
+            Remove = Mid$(s, Count + 1)
+            Exit Function
+        End If
+        If startIndex < L Then
+            If startIndex + Count < L Then
+                Remove = Left(s, startIndex) & Mid(s, startIndex + Count + 1)
+                Exit Function
+            End If
+            If startIndex + Count = L Then
+                Remove = Left(s, startIndex)
+                Exit Function
+            End If
+            If L < startIndex + Count Then
+                Remove = Left(s, startIndex)
+                'Error message
+                Exit Function
+            End If
+        End If
+        If startIndex = L Then
+            Remove = s
+            'Error message
+            Exit Function
+        End If
+        Remove = s
+        'Error message
+        Exit Function
+    End If
+    If Count = L Then
+        If startIndex < 0 Then
+            Remove = ""
+            'Error message
+            Exit Function
+        End If
+        If startIndex = 0 Then
+            Remove = "" 'Mid$(s, Count + 1)
+            Exit Function
+        End If
+        If startIndex < L Then
+            Remove = Left$(s, startIndex)
+            'Error message
+            Exit Function
+        End If
+    End If
+    If L < Count Then
+        If startIndex < 0 Then
+            Remove = ""
+            'Error message
+            Exit Function
+        End If
+        If startIndex = 0 Then
+            Remove = "" 'Mid$(s, Count + 1)
+            'Error message
+            Exit Function
+        End If
+        If startIndex < L Then
+            Remove = Left(s, startIndex)
+            'Error message
+            Exit Function
+        End If
+    End If
 End Function
-
-'Public Function Replace() As String
-'    '
-'End Function
 
 Public Function StartsWith(s As String, ByVal Value As String) As Boolean
     StartsWith = Left$(s, Len(Value)) = Value
