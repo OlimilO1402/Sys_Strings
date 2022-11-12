@@ -52,6 +52,13 @@ End Enum
     Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
     Private Declare Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
 #End If
+Private Type TCur
+    Value As Currency
+End Type
+Private Type TLong2
+    Lo As Long
+    Hi As Long
+End Type
 'VB does automatic in and out Ansi/Unicode conversion when calling winapi-functions with parameters of type String
 'you can simulate this behaviour by using StrPtrWA in the call and WACorr afterwards
 'Public Function StrPtrWA(ByRef s_inout As String) As LongPtr
@@ -257,7 +264,7 @@ End Function
 Public Function Double_TryParse(ByVal Value As String, ByRef d_out As Double) As Boolean
 Try: On Error GoTo Catch
     Value = Replace(Value, ",", ".")
-    d_out = val(Value)
+    d_out = Val(Value)
     Double_TryParse = True
 Catch:
 End Function
@@ -265,7 +272,7 @@ End Function
 Public Function Single_TryParse(ByVal Value As String, ByRef s_out As Single) As Boolean
 Try: On Error GoTo Catch
     Value = Replace(Value, ",", ".")
-    s_out = CSng(val(Value))
+    s_out = CSng(Val(Value))
     Single_TryParse = True
     Exit Function
 Catch:
@@ -281,6 +288,12 @@ End Function
 
 Public Function Hex8(ByVal Value As Long) As String
     Hex8 = Hex(Value): If Len(Hex8) < 8 Then Hex8 = String(8 - Len(Hex8), "0") & Hex8
+End Function
+
+Public Function Hex16(ByVal Value As Currency) As String
+    Dim tc As TCur:  tc.Value = Value
+    Dim tl As TLong2: LSet tl = tc
+    Hex16 = Hex8(tl.Hi) & Hex8(tl.Lo)
 End Function
 
 Public Function Contains(s As String, ByVal Value As String) As Boolean
