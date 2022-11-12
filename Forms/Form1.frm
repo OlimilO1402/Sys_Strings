@@ -10,6 +10,14 @@ Begin VB.Form Form1
    ScaleHeight     =   7695
    ScaleWidth      =   13455
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton BtnTestByteOrderMark 
+      Caption         =   "Test ByteOrderMark >>"
+      Height          =   375
+      Left            =   11520
+      TabIndex        =   28
+      Top             =   480
+      Width           =   1815
+   End
    Begin VB.CommandButton Command1 
       Caption         =   "Some Tests"
       Height          =   375
@@ -314,6 +322,10 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+
+Private Sub BtnTestByteOrderMark_Click()
+
+End Sub
 
 Private Sub Command1_Click()
     Dim s As String: s = "Dies ist ein Teststring"

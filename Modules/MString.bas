@@ -1,36 +1,75 @@
 Attribute VB_Name = "MString"
-Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336;
+Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336; 2022.11.01 Zeilen: 625;
+'https://learn.microsoft.com/de-de/cpp/text/how-to-convert-between-various-string-types?view=msvc-170
 
-#Const Unicode = 1
+'https://de.wikipedia.org/wiki/Byte_Order_Mark
+Public Enum EByteOrderMark
+    bom_UTF_8 = &HBFBBEF        '                     '     239 187 191     '  ï»¿           ' [4]
+    bom_UTF_16_BE = &HFFFE&     ' Big Endian Motorola '         254 255     '   þÿ
+    bom_UTF_16_LE = &HFEFF&     ' little endian Intel '         255 254     '   ÿþ
+    bom_UTF_32_BE = &HFFFE0000  ' Big Endian Motorola '   0   0 254 255     ' ??þÿ
+    bom_UTF_32_LE = &HFEFF      ' little endian Intel ' 255 254   0   0     ' ÿþ??
+    bom_UTF_7 = &H762F2B        '                     '      43  47 118
+                                ' und ein Zeichen aus: [ 56 | 57 | 43 | 47 ]
+                                ' und ein Zeichen aus: [ 38 | 39 | 2B | 2F ]           ' [5]
+                                ' + / v und ein Zeichen aus:  [  8 |  9 |  + |  / ]
+    bom_UTF_1 = &H4C64F7        '                     '     247 100  76     ' ÷dL
+    bom_UTF_EBCDIC = &H736673DD '                     ' 221 115 102 115     ' Ýsfs
+    bom_SCSU = &HFFFE0E         '                     '      14 254 255     ' ?þÿ            ' [6]
+                                ' (von anderen möglichen Bytefolgen wird abgeraten)
+    bom_BOCU_1 = &H28EEFB       '                     '     251 238  40
+                                ' optional gefolgt von FF                              ' [7]
+                                ' optional gefolgt von 255     ûî
+                                ' optional gefolgt von          ÿ
+    bom_GB_18030 = &H33953184   '               ' 132  49 149  51     ' „1•3
+End Enum
+
+'Public Enum ECodePage
+'
+'End Enum
+
+'#Const Unicode = 1
 
 '#If VBA7 = 0 Then
 '    Private Enum LongPtr
 '        [_]
 '    End Enum
 '#End If
-Private Declare Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
-Private Declare Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
-Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
-Private Declare Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
-
+#If VBA7 Then
+    Private Declare PtrSafe Function WideCharToMultiByte Lib "kernel32.dll" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpDefaultChar As LongPtr, ByVal lpUsedDefaultChar As LongPtr) As Long
+    Private Declare PtrSafe Function MultiByteToWideChar Lib "kernel32.dll" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long) As Long
+    Private Declare PtrSafe Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
+    Private Declare PtrSafe Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
+    Private Declare PtrSafe Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
+    Private Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
+#Else
+    'https://learn.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-widechartomultibyte
+    Private Declare Function WideCharToMultiByte Lib "kernel32.dll" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpDefaultChar As LongPtr, ByVal lpUsedDefaultChar As LongPtr) As Long
+    'https://learn.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-multibytetowidechar
+    Private Declare Function MultiByteToWideChar Lib "kernel32.dll" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long) As Long
+    Private Declare Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
+    Private Declare Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
+    Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
+    Private Declare Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
+#End If
 'VB does automatic in and out Ansi/Unicode conversion when calling winapi-functions with parameters of type String
 'you can simulate this behaviour by using StrPtrWA in the call and WACorr afterwards
-Public Function StrPtrWA(ByRef s_inout As String) As LongPtr
-#If Unicode Then
-    StrPtrWA = StrPtr(s_inout)
-#Else
-    s_inout = StrConv(s_inout, vbFromUnicode)
-    StrPtrWA = StrPtr(s_inout)
-#End If
-End Function
+'Public Function StrPtrWA(ByRef s_inout As String) As LongPtr
+'#If Unicode Then
+'    StrPtrWA = StrPtr(s_inout)
+'#Else
+'    s_inout = StrConv(s_inout, vbFromUnicode)
+'    StrPtrWA = StrPtr(s_inout)
+'#End If
+'End Function
 
-Public Sub WACorr(ByRef s_inout As String)
-#If Unicode Then
-    '
-#Else
-    s_inout = StrConv(s_inout, vbUnicode)
-#End If
-End Sub
+'Public Sub WACorr(ByRef s_inout As String)
+'#If Unicode Then
+'    '
+'#Else
+'    s_inout = StrConv(s_inout, vbUnicode)
+'#End If
+'End Sub
 
 Public Function Trim0(ByVal s As String) As String
     Trim0 = VBA.Strings.Trim$(Left$(s, lstrlenW(ByVal StrPtr(s))))
@@ -138,8 +177,8 @@ Public Function RecursiveReplace(ByVal Expression As String, ByVal Find As Strin
     'a normal Replace("C:\\\test\\\path\\\dir\\\file.txt", "\\", "\") returns „C:\\test\\path\\dir\\file.txt“
     ' RecursivReplace("C:\\\test\\\path\\\dir\\\file.txt", "\\", "\") returns „C:\test\path\dir\file.txt“
     
-    Dim Pos As Long: Pos = InStr(1, Expression, Find)
-    If Pos Then
+    Dim pos As Long: pos = InStr(1, Expression, Find)
+    If pos Then
         Dim r As String: r = VBA.Replace(Expression, Find, Replace)
         'check for stack overflow:
         If (r = Expression) Or (Len(Expression) < Len(r)) Then RecursiveReplace = r: Exit Function
@@ -215,15 +254,6 @@ Public Function BolToStr(ByVal b As Boolean) As String
     If b Then BolToStr = "True" Else BolToStr = "False"
 End Function
 
-
-
-
-
-
-
-
-
-
 Public Function Double_TryParse(ByVal Value As String, ByRef d_out As Double) As Boolean
 Try: On Error GoTo Catch
     Value = Replace(Value, ",", ".")
@@ -286,8 +316,8 @@ Public Function Insert(s As String, ByVal startIndex As Long, ByVal Value As Str
 End Function
 
 Public Function LastIndexOf(s As String, Value As String, ByVal startIndex As Long, ByVal Count As Long, Optional ByVal compare As VbCompareMethod = vbBinaryCompare) As Long
-    Dim Pos As Long: Pos = InStrRev(s, Value, startIndex, compare)
-    LastIndexOf = Pos
+    Dim pos As Long: pos = InStrRev(s, Value, startIndex, compare)
+    LastIndexOf = pos
 End Function
 
 Public Function GetDecimalSeparator() As String
@@ -435,7 +465,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
     'ist startindex 1-basiert?
     'If startIndex = 0 And Count = -1 Then
     'Dim pos As Long: pos = Len(s) - startIndex
-    Dim L As Long: L = Len(s)
+    Dim l As Long: l = Len(s)
     If Count < 0 Then
         If startIndex < 0 Then
             Remove = ""
@@ -446,11 +476,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = ""
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left$(s, startIndex)
             Exit Function
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             Exit Function
         End If
@@ -468,11 +498,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = s
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = s
             Exit Function
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             Exit Function
         End If
@@ -480,7 +510,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count < L Then
+    If Count < l Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -490,22 +520,22 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < L Then
-            If startIndex + Count < L Then
+        If startIndex < l Then
+            If startIndex + Count < l Then
                 Remove = Left(s, startIndex) & Mid(s, startIndex + Count + 1)
                 Exit Function
             End If
-            If startIndex + Count = L Then
+            If startIndex + Count = l Then
                 Remove = Left(s, startIndex)
                 Exit Function
             End If
-            If L < startIndex + Count Then
+            If l < startIndex + Count Then
                 Remove = Left(s, startIndex)
                 'Error message
                 Exit Function
             End If
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             'Error message
             Exit Function
@@ -514,7 +544,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count = L Then
+    If Count = l Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -524,13 +554,13 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = "" 'Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left$(s, startIndex)
             'Error message
             Exit Function
         End If
     End If
-    If L < Count Then
+    If l < Count Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -541,7 +571,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             'Error message
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left(s, startIndex)
             'Error message
             Exit Function
@@ -562,3 +592,49 @@ Public Function ToCharArray(s As String, ByVal startIndex As Long, ByVal Length 
     lstrcpyW VarPtr(CharArray(0)), StrPtr(Mid$(s, startIndex, Length))
     ToCharArray = CharArray
 End Function
+
+Public Function EByteOrderMark_Parse(ByVal Value As Long) As EByteOrderMark
+    
+    Dim e  As Long
+    
+    e = Value
+    If e = EByteOrderMark.bom_UTF_32_BE Or _
+       e = EByteOrderMark.bom_GB_18030 Or _
+       e = EByteOrderMark.bom_UTF_EBCDIC Or _
+       e = EByteOrderMark.bom_UTF_32_LE Then EByteOrderMark_Parse = e: Exit Function
+    
+    e = Value And &HFFFFFF
+    If e = EByteOrderMark.bom_SCSU Or _
+       e = EByteOrderMark.bom_UTF_8 Or _
+       e = EByteOrderMark.bom_BOCU_1 Or _
+       e = EByteOrderMark.bom_UTF_1 Then EByteOrderMark_Parse = e: Exit Function
+       
+    If e = EByteOrderMark.bom_UTF_7 Then
+        e = Value \ 2 ^ 24 'shiftright 24 bits
+        If e = &H38 Or e = &H39 Or e = &H2B Or e = &H2F Then _
+                    EByteOrderMark_Parse = EByteOrderMark.bom_UTF_7: Exit Function
+    End If
+    
+    e = Value And &HFFFF&
+    If e = EByteOrderMark.bom_UTF_16_BE Or _
+       e = EByteOrderMark.bom_UTF_16_LE Then EByteOrderMark_Parse = e: Exit Function
+    
+End Function
+
+Public Function EByteOrderMark_ToStr(ByVal Value As EByteOrderMark) As String
+    Dim s As String
+    Dim e As EByteOrderMark
+    Select Case Value
+    Case e = bom_BOCU_1:     s = "bom_BOCU_1"
+    Case e = bom_SCSU:       s = "bom_SCSU"
+    Case e = bom_UTF_1:      s = "bom_UTF_1"
+    Case e = bom_UTF_16_BE:  s = "bom_UTF_16_BE"
+    Case e = bom_UTF_16_LE:  s = "bom_UTF_16_LE"
+    Case e = bom_UTF_32_BE:  s = "bom_UTF_32_BE"
+    Case e = bom_UTF_7:      s = "bom_UTF_7"
+    Case e = bom_UTF_8:      s = "bom_UTF_8"
+    Case e = bom_UTF_EBCDIC: s = "bom_UTF_EBCDIC"
+    End Select
+    EByteOrderMark_ToStr = s
+End Function
+
