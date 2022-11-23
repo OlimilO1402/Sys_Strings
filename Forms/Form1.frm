@@ -10,6 +10,14 @@ Begin VB.Form Form1
    ScaleHeight     =   7695
    ScaleWidth      =   13455
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton Command2 
+      Caption         =   "Command2"
+      Height          =   495
+      Left            =   120
+      TabIndex        =   29
+      Top             =   6000
+      Width           =   1215
+   End
    Begin VB.CommandButton BtnTestByteOrderMark 
       Caption         =   "Test ByteOrderMark >>"
       Height          =   375
@@ -323,16 +331,29 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Private Sub BtnTestByteOrderMark_Click()
-
-End Sub
-
 Private Sub Command1_Click()
     Dim s As String: s = "Dies ist ein Teststring"
     Dim chars() As Integer
     chars = MString.ToCharArray(s, 14, 5)
     MsgBox ChrW(chars(0)) & " " & ChrW(chars(1)) & " " & ChrW(chars(2)) & " " & ChrW(chars(3)) & " " & ChrW(chars(4))
     If MString.StartsWith(s, "Dies") Then MsgBox "Yes, String s starts with ""Dies"""
+End Sub
+
+Private Sub Command2_Click()
+    'compare PadLeft and PadLeft2
+    'interesting are the edges
+    'what is if the original string is longer than the given value totalwidth
+    'in .net: der ursprüngliche String wird zurückgegeben
+    
+    Dim s As String: s = "Dies ist ein String"
+    
+    s = """" & PadLeft(s, 10) & """"
+    MsgBox s
+    
+    's = "Dies ist ein String"
+    's = """" & PadLeft2(s, 10) & """"
+    'MsgBox s
+    
 End Sub
 
 Private Sub Form_Load()
@@ -346,26 +367,26 @@ Private Sub Form_Load()
 End Sub
 
 Private Sub Form_Resize()
-    Dim L As Single, T As Single, W As Single, H As Single
+    Dim l As Single, T As Single, W As Single, H As Single
     Dim m As Single: m = 8 * Screen.TwipsPerPixelX
     
-    T = BtnInfo.Top: W = BtnInfo.Width: H = BtnInfo.Height: L = Me.ScaleWidth - m - W
-    If W > 0 And H > 0 Then BtnInfo.Move L, T, W, H
+    T = BtnInfo.Top: W = BtnInfo.Width: H = BtnInfo.Height: l = Me.ScaleWidth - m - W
+    If W > 0 And H > 0 Then BtnInfo.Move l, T, W, H
     
-    L = Text1.Left: T = Text1.Top: H = Text1.Height: W = Me.ScaleWidth - m - W - L
-    If W > 0 And H > 0 Then Text1.Move L, T, W, H
+    l = Text1.Left: T = Text1.Top: H = Text1.Height: W = Me.ScaleWidth - m - W - l
+    If W > 0 And H > 0 Then Text1.Move l, T, W, H
     
-    T = Text2.Top: W = Me.ScaleWidth - L - m: H = Text2.Height
-    If W > 0 And H > 0 Then Text2.Move L, T, W, H
+    T = Text2.Top: W = Me.ScaleWidth - l - m: H = Text2.Height
+    If W > 0 And H > 0 Then Text2.Move l, T, W, H
     
     T = Text3.Top: H = Text3.Height
-    If W > 0 And H > 0 Then Text3.Move L, T, W, H
+    If W > 0 And H > 0 Then Text3.Move l, T, W, H
     
     T = Text4.Top: H = Text4.Height
-    If W > 0 And H > 0 Then Text4.Move L, T, W, H
+    If W > 0 And H > 0 Then Text4.Move l, T, W, H
     
-    W = Resizer.Width: H = Resizer.Height: L = Me.ScaleWidth - W: T = Me.ScaleHeight - H:
-    If W > 0 And H > 0 Then Resizer.Move L, T, W, H
+    W = Resizer.Width: H = Resizer.Height: l = Me.ScaleWidth - W: T = Me.ScaleHeight - H:
+    If W > 0 And H > 0 Then Resizer.Move l, T, W, H
 End Sub
 
 Function Max(V1, V2)

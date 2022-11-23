@@ -363,8 +363,12 @@ Function PadLeft(this As String, ByVal totalWidth As Long, Optional ByVal paddin
             PadLeft = this
         End If
     Else
-        PadLeft = Space$(totalWidth)
-        RSet PadLeft = this
+        If Len(this) < totalWidth Then
+            PadLeft = Space$(totalWidth)
+            RSet PadLeft = this
+        Else
+            PadLeft = this
+        End If
     End If
 End Function
 
@@ -392,12 +396,16 @@ Function PadRight(this As String, ByVal totalWidth As Long, Optional ByVal paddi
             PadRight = this
         End If
     Else
-        PadRight = Space$(totalWidth)
-        LSet PadRight = this
+        If Len(this) < totalWidth Then
+            PadRight = Space$(totalWidth)
+            LSet PadRight = this
+        Else
+            PadRight = this
+        End If
     End If
 End Function
 
-'Public Function PadLeft(StrVal As String, _
+'Public Function PadLeft2(StrVal As String, _
 '                        ByVal totalWidth As Long, _
 '                        Optional ByVal padChar As String) As String
 '
@@ -410,17 +418,17 @@ End Function
 '    '             filled up with spaces.
 '    '
 '    If Len(padChar) Then
-'        PadLeft = StrVal
+'        PadLeft2 = StrVal
 '        If Len(StrVal) <= totalWidth Then _
-'            PadLeft = String$(totalWidth - Len(StrVal), padChar) & PadLeft
+'            PadLeft2 = String$(totalWidth - Len(StrVal), padChar) & PadLeft2
 '    Else
-'        PadLeft = Space$(totalWidth)
-'        RSet PadLeft = StrVal
+'        PadLeft2 = Space$(totalWidth)
+'        RSet PadLeft2 = StrVal
 '    End If
 '
 'End Function
-'
-'Public Function PadRight(StrVal As String, _
+''
+'Public Function PadRight2(StrVal As String, _
 '                         ByVal totalWidth As Long, _
 '                         Optional ByVal padChar As String) As String
 '
@@ -433,16 +441,16 @@ End Function
 '    '             filled up with spaces.
 '    '
 '    If Len(padChar) Then
-'        PadRight = StrVal
+'        PadRight2 = StrVal
 '        If Len(StrVal) <= totalWidth Then _
-'            PadRight = PadRight & String$(totalWidth - Len(StrVal), padChar)
+'            PadRight2 = PadRight2 & String$(totalWidth - Len(StrVal), padChar)
 '    Else
-'        PadRight = Space$(totalWidth)
-'        LSet PadRight = StrVal
+'        PadRight2 = Space$(totalWidth)
+'        LSet PadRight2 = StrVal
 '    End If
 '
 'End Function
-
+'
 'Dim s As String = "Dies ist ein String"
 'Remove(startIndex, count)
 's = s.Remove(-1)     ' "" und Fehlermeldung
