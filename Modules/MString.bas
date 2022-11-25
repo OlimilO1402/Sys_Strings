@@ -24,6 +24,9 @@ Public Enum EByteOrderMark
     bom_GB_18030 = &H33953184   '               ' 132  49 149  51     ' ﻿
 End Enum
 
+'Maybe we need an enum Encoding
+Private Const CP_UTF8 As Long = 65001
+
 'Public Enum ECodePage
 '
 'End Enum
@@ -40,6 +43,7 @@ End Enum
     Private Declare PtrSafe Function MultiByteToWideChar Lib "kernel32.dll" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long) As Long
     Private Declare PtrSafe Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
     Private Declare PtrSafe Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
+    Private Declare PtrSafe Function MessageBoxW Lib "user32" (ByVal hwnd As LongPtr, ByVal lpText As LongPtr, ByVal lpCaption As LongPtr, ByVal wType As Long) As Long
     Private Declare PtrSafe Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
     Private Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
 #Else
@@ -49,6 +53,7 @@ End Enum
     Private Declare Function MultiByteToWideChar Lib "kernel32.dll" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long) As Long
     Private Declare Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
     Private Declare Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
+    Private Declare Function MessageBoxW Lib "user32" (ByVal hwnd As LongPtr, ByVal lpText As LongPtr, ByVal lpCaption As LongPtr, ByVal wType As Long) As Long
     Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal pv As LongPtr)
     Private Declare Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
 #End If
@@ -486,7 +491,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
     'ist startindex 1-basiert?
     'If startIndex = 0 And Count = -1 Then
     'Dim pos As Long: pos = Len(s) - startIndex
-    Dim l As Long: l = Len(s)
+    Dim L As Long: L = Len(s)
     If Count < 0 Then
         If startIndex < 0 Then
             Remove = ""
@@ -497,11 +502,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = ""
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left$(s, startIndex)
             Exit Function
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             Exit Function
         End If
@@ -519,11 +524,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = s
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = s
             Exit Function
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             Exit Function
         End If
@@ -531,7 +536,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count < l Then
+    If Count < L Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -541,22 +546,22 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < l Then
-            If startIndex + Count < l Then
+        If startIndex < L Then
+            If startIndex + Count < L Then
                 Remove = Left(s, startIndex) & Mid(s, startIndex + Count + 1)
                 Exit Function
             End If
-            If startIndex + Count = l Then
+            If startIndex + Count = L Then
                 Remove = Left(s, startIndex)
                 Exit Function
             End If
-            If l < startIndex + Count Then
+            If L < startIndex + Count Then
                 Remove = Left(s, startIndex)
                 'Error message
                 Exit Function
             End If
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             'Error message
             Exit Function
@@ -565,7 +570,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count = l Then
+    If Count = L Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -575,13 +580,13 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = "" 'Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left$(s, startIndex)
             'Error message
             Exit Function
         End If
     End If
-    If l < Count Then
+    If L < Count Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -592,7 +597,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             'Error message
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left(s, startIndex)
             'Error message
             Exit Function
@@ -658,4 +663,46 @@ Public Function EByteOrderMark_ToStr(ByVal Value As EByteOrderMark) As String
     End Select
     EByteOrderMark_ToStr = s
 End Function
+
+Public Function ConvertFromUTF8(ByRef Source() As Byte) As String
+    'All credits for this function are going to Philipp Stephani from ActiveVB
+    'http://www.activevb.de/rubriken/faq/faq0155.html
+    Dim Size    As Long:       Size = UBound(Source) - LBound(Source) + 1
+    Dim pSource As LongPtr: pSource = VarPtr(Source(LBound(Source)))
+    Dim Length  As Long:     Length = MultiByteToWideChar(CP_UTF8, 0, pSource, Size, 0, 0)
+    Dim Buffer  As String:   Buffer = Space$(Length)
+    MultiByteToWideChar CP_UTF8, 0, pSource, Size, StrPtr(Buffer), Length
+    ConvertFromUTF8 = Buffer
+    
+End Function
+
+Public Property Get App_EXEName() As String
+#If VBA6 Or VBA7 Then
+    App_EXEName = Application.Name
+#Else
+    App_EXEName = App.EXEName
+#End If
+End Property
+
+Public Function GetGreekAlphabet() As String
+    Dim s As String
+    Dim i As Long
+    Dim alp As Long: alp = 913 'der Gro遝 griechische Buchstabe Alpha
+    For i = alp To alp + 24
+        s = s & ChrW(i)
+    Next
+    s = s & " "
+    alp = alp + 32             'der Kleine griechische Buchstabe alpha
+    For i = alp To alp + 24
+        s = s & ChrW(i)
+    Next
+    GetGreekAlphabet = s
+End Function
+
+Public Function MsgBoxW(Prompt, Optional ByVal Buttons As VbMsgBoxStyle = vbOKOnly, Optional ByVal Title) As VbMsgBoxResult
+'Public Function MsgBoxW(Prompt, Optional ByVal Buttons As VbMsgBoxStyle = vbOKOnly, Optional Title, Optional Helpfile, Optional Context) As VbMsgBoxResult
+    Title = IIf(IsMissing(Title), App_EXEName, CStr(Title))
+    MsgBoxW = MessageBoxW(0, StrPtr(Prompt), StrPtr(Title), Buttons)
+End Function
+
 
