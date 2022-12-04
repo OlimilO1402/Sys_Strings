@@ -238,7 +238,8 @@ Public Function BoolToYesNo(ByVal b As Boolean) As String
 End Function
 
 Public Function StrToBol(ByVal s As String) As Boolean
-    s = UCase$(Trim$(s))
+Try: On Error GoTo Catch
+    s = LCase$(Trim$(s))
     If s = "yes" Then StrToBol = True: Exit Function
     If s = "ja" Then StrToBol = True: Exit Function
     If s = "ok" Then StrToBol = True: Exit Function
@@ -247,6 +248,7 @@ Public Function StrToBol(ByVal s As String) As Boolean
     If s = "wahr" Then StrToBol = True: Exit Function
     If s = "true" Then StrToBol = True: Exit Function
     StrToBol = CBool(s)
+Catch:
 End Function
 
 'Private Function StrToBol(StrVal As String) As Boolean
