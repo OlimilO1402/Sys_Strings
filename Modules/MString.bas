@@ -64,6 +64,10 @@ Private Type TLong2
     Lo As Long
     Hi As Long
 End Type
+
+#If False Then
+    Value
+#End If
 'VB does automatic in and out Ansi/Unicode conversion when calling winapi-functions with parameters of type String
 'you can simulate this behaviour by using StrPtrWA in the call and WACorr afterwards
 'Public Function StrPtrWA(ByRef s_inout As String) As LongPtr
@@ -617,6 +621,12 @@ Public Function ToCharArray(s As String, ByVal startIndex As Long, ByVal Length 
     ReDim CharArray(0 To Length - 1) As Integer
     lstrcpyW VarPtr(CharArray(0)), StrPtr(Mid$(s, startIndex, Length))
     ToCharArray = CharArray
+End Function
+
+Public Function SArray(ParamArray strArr()) As String()
+    ReDim sa(0 To UBound(strArr)) As String
+    Dim i As Long: For i = 0 To UBound(strArr): sa(i) = strArr(i): Next
+    SArray = sa
 End Function
 
 Public Function EByteOrderMark_Parse(ByVal Value As Long) As EByteOrderMark
