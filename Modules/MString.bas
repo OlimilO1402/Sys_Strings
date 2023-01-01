@@ -4,24 +4,23 @@ Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336; 2022.11.01 Zeilen: 625;
 
 'https://de.wikipedia.org/wiki/Byte_Order_Mark
 Public Enum EByteOrderMark
-    bom_UTF_8 = &HBFBBEF        '                     '     239 187 191     '  ï»¿           ' [4]
-    bom_UTF_16_BE = &HFFFE&     ' Big Endian Motorola '         254 255     '   þÿ
-    bom_UTF_16_LE = &HFEFF&     ' little endian Intel '         255 254     '   ÿþ
-    bom_UTF_32_BE = &HFFFE0000  ' Big Endian Motorola '   0   0 254 255     ' ??þÿ
-    bom_UTF_32_LE = &HFEFF      ' little endian Intel ' 255 254   0   0     ' ÿþ??
-    bom_UTF_7 = &H762F2B        '                     '      43  47 118
-                                ' und ein Zeichen aus: [ 56 | 57 | 43 | 47 ]
-                                ' und ein Zeichen aus: [ 38 | 39 | 2B | 2F ]           ' [5]
-                                ' + / v und ein Zeichen aus:  [  8 |  9 |  + |  / ]
-    bom_UTF_1 = &H4C64F7        '                     '     247 100  76     ' ÷dL
-    bom_UTF_EBCDIC = &H736673DD '                     ' 221 115 102 115     ' Ýsfs
-    bom_SCSU = &HFFFE0E         '                     '      14 254 255     ' ?þÿ            ' [6]
-                                ' (von anderen möglichen Bytefolgen wird abgeraten)
-    bom_BOCU_1 = &H28EEFB       '                     '     251 238  40
-                                ' optional gefolgt von FF                              ' [7]
-                                ' optional gefolgt von 255     ûî
-                                ' optional gefolgt von          ÿ
-    bom_GB_18030 = &H33953184   '               ' 132  49 149  51     ' „1•3
+
+    bom_None = 0
+                                '    Zeichenfolge:        4  3  2  1
+    bom_UTF_8 = &HBFBBEF        '    bom_UTF_8      = &H    BF BB EF  '                     '     239 187 191     ' ï»¿     ' [4]
+    bom_UTF_16_BE = &HFFFE      '    bom_UTF_16_BE  = &H       FF FE  ' Big Endian Motorola '         254 255     ' þÿ
+    bom_UTF_16_LE = &HFEFF      '    bom_UTF_16_LE  = &H       FE FF  ' little endian Intel '         255 254     ' ÿþ
+    bom_UTF_32_BE = &HFFFE0000  '    bom_UTF_32_BE  = &H FF FE 00 00  ' Big Endian Motorola '   0   0 254 255     ' ??þÿ
+    bom_UTF_32_LE = &HFEFF&     '    bom_UTF_32_LE  = &H 00 00 FE FF  ' little endian Intel ' 255 254   0   0     ' ??ÿþ
+    bom_UTF_7 = &H762F2B        '    bom_UTF_7      = &H    76 2F 2B  '                     '      43  47 118     ' +/v     ' und ein Zeichen aus:  [  8 |  9 |  + |  / ]
+                                '      und aus: [&H38|&H39|&H2B|&H2F] ' und ein Zeichen aus: [ 56| 57| 43| 47]              ' [5]
+    bom_UTF_1 = &H4C64F7        '    bom_UTF_1      = &H    4C 64 F7  '                     '     247 100  76     ' ÷dL
+    bom_UTF_EBCDIC = &H736673DD '    bom_UTF_EBCDIC = &H 73 66 73 DD  '                     ' 221 115 102 115     ' Ýsfs
+    bom_SCSU = &HFFFE0E         '    bom_SCSU       = &H    FF FE 0E  '                     '      14 254 255     ' ?þÿ     ' [6]   (von anderen möglichen Bytefolgen wird abgeraten)
+    bom_BOCU_1 = &H28EEFB       '    bom_BOCU_1     = &H    28 EE FB  '                     '     251 238  40     ' ûî(     ' [7]   optional gefolgt von ÿ
+                                '    optional gefolgt von FF          ' optional gefolgt von              255
+    bom_GB_18030 = &H33953184   '    bom_GB_18030   = &H 33 95 31 84  '                     ' 132  49 149  51     ' „1•3
+
 End Enum
 
 'Maybe we need an enum Encoding
@@ -497,7 +496,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
     'ist startindex 1-basiert?
     'If startIndex = 0 And Count = -1 Then
     'Dim pos As Long: pos = Len(s) - startIndex
-    Dim L As Long: L = Len(s)
+    Dim l As Long: l = Len(s)
     If Count < 0 Then
         If startIndex < 0 Then
             Remove = ""
@@ -508,11 +507,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = ""
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left$(s, startIndex)
             Exit Function
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             Exit Function
         End If
@@ -530,11 +529,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = s
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = s
             Exit Function
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             Exit Function
         End If
@@ -542,7 +541,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count < L Then
+    If Count < l Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -552,22 +551,22 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < L Then
-            If startIndex + Count < L Then
+        If startIndex < l Then
+            If startIndex + Count < l Then
                 Remove = Left(s, startIndex) & Mid(s, startIndex + Count + 1)
                 Exit Function
             End If
-            If startIndex + Count = L Then
+            If startIndex + Count = l Then
                 Remove = Left(s, startIndex)
                 Exit Function
             End If
-            If L < startIndex + Count Then
+            If l < startIndex + Count Then
                 Remove = Left(s, startIndex)
                 'Error message
                 Exit Function
             End If
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             'Error message
             Exit Function
@@ -576,7 +575,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count = L Then
+    If Count = l Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -586,13 +585,13 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = "" 'Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left$(s, startIndex)
             'Error message
             Exit Function
         End If
     End If
-    If L < Count Then
+    If l < Count Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -603,7 +602,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             'Error message
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left(s, startIndex)
             'Error message
             Exit Function
@@ -631,47 +630,133 @@ Public Function SArray(ParamArray strArr()) As String()
     SArray = sa
 End Function
 
+Public Sub SCArray(sa() As String, ParamArray strArr())
+    Dim i As Long: For i = 0 To UBound(strArr): sa(i) = strArr(i): Next
+End Sub
+
+Public Function AdverbNum_ToStr(ByVal num As Byte) As String
+    Static sa(0 To 11) As String
+    If Len(sa(1)) = 0 Then SCArray sa, "first", "second", "third", "fourth", "fifth", "sixt", "seventh", "eigth", "nineth", "tenth", "eleventh", "twelfeth"
+    AdverbNum_ToStr = sa(num - 1)
+End Function
+
+'    Zeichenfolge:        4  3  2  1
+'    bom_None       =              0
+'    bom_UTF_32_BE  = &H FF FE 00 00  ' Big Endian Motorola '   0   0 254 255     ' ??þÿ
+'    bom_SCSU       = &H    FF FE 0E  '                     '      14 254 255     ' ?þÿ      ' [6]
+'    bom_UTF_7      = &H    76 2F 2B  '                     '      43  47 118     ' +/v
+'    bom_GB_18030   = &H 33 95 31 84  '                     ' 132  49 149  51     ' „1•3
+'    bom_UTF_EBCDIC = &H 73 66 73 DD  '                     ' 221 115 102 115     ' Ýsfs
+'    bom_UTF_8      = &H    BF BB EF  '                     '     239 187 191     ' ï»¿     ' [4]
+'    bom_UTF_1      = &H    4C 64 F7  '                     '     247 100  76     ' ÷dL
+'    bom_BOCU_1     = &H    28 EE FB  '                     '     251 238  40     ' ûî(
+'    bom_UTF_16_BE  = &H       FF FE  ' Big Endian Motorola '         254 255     ' þÿ
+'    bom_UTF_16_LE  = &H       FE FF  ' little endian Intel '         255 254     ' ÿþ
+'    bom_UTF_32_LE  = &H 00 00 FE FF  ' little endian Intel ' 255 254   0   0     ' ??ÿþ
+
+
+'                                     ' und ein Zeichen aus: [ 56 | 57 | 43 | 47 ]
+'                                     ' und ein Zeichen aus: [ 38 | 39 | 2B | 2F ]           ' [5]
+'                                     ' +/v und ein Zeichen aus:  [  8 |  9 |  + |  / ]
+'                                     ' (von anderen möglichen Bytefolgen wird abgeraten)
+'                                     ' optional gefolgt von FF                              ' [7]
+'                                     ' optional gefolgt von 255     ûî
+'                                     ' optional gefolgt von          ÿ
+Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOrderMark
+    'checks if s starts with any BOM, returns the bom, andalso returns the rest of the string if there is anything left
+    Dim l As Long: l = Len(s)
+    If l < 2 Then Exit Function
+    Dim c1 As Byte: c1 = Asc(Mid(s, 1, 1))
+    Dim c2 As Byte: c2 = Asc(Mid(s, 2, 1))
+    If l = 2 Then
+        Dim ibom As Integer
+        ibom = CInt("&H" & Hex2(c2) & Hex2(c1))
+        If ibom = EByteOrderMark.bom_UTF_16_BE Or ibom = EByteOrderMark.bom_UTF_16_LE Then
+            IsBOM = ibom: Exit Function
+        End If
+    End If
+    Dim c3 As Byte, c4 As Byte
+    Dim lbom As Long
+    If l > 2 Then
+        c3 = Asc(Mid(s, 3, 1))
+        lbom = CLng("&H" & Hex2(c3) & Hex2(c2) & Hex2(c1))
+        If Long_IsBOM(lbom) Then
+            IsBOM = lbom
+            rest_out = Mid(s, 4)
+            Exit Function
+        End If
+    End If
+    If l > 3 Then
+        c4 = Asc(Mid(s, 4, 1))
+        lbom = CLng("&H" & Hex2(c4) & Hex2(c3) & Hex2(c2) & Hex2(c1))
+        If Long_IsBOM(lbom) Then
+            IsBOM = lbom
+            rest_out = Mid(s, 5)
+            Exit Function
+        End If
+    End If
+End Function
+
+Public Function Long_IsBOM(ByVal Value As Long) As EByteOrderMark
+    Long_IsBOM = Value
+    Select Case Value
+    Case EByteOrderMark.bom_UTF_8:      Exit Function
+    Case EByteOrderMark.bom_UTF_16_BE:  Exit Function
+    Case EByteOrderMark.bom_UTF_16_LE:  Exit Function
+    Case EByteOrderMark.bom_UTF_32_BE:  Exit Function
+    Case EByteOrderMark.bom_UTF_32_LE:  Exit Function
+    Case EByteOrderMark.bom_UTF_7:      Exit Function
+    Case EByteOrderMark.bom_UTF_1:      Exit Function
+    Case EByteOrderMark.bom_UTF_EBCDIC: Exit Function
+    Case EByteOrderMark.bom_SCSU:       Exit Function
+    Case EByteOrderMark.bom_BOCU_1:     Exit Function
+    Case EByteOrderMark.bom_GB_18030:   Exit Function
+    Case Else: Long_IsBOM = bom_None
+    End Select
+End Function
+
 Public Function EByteOrderMark_Parse(ByVal Value As Long) As EByteOrderMark
     
-    Dim e  As Long
-    
-    e = Value
-    If e = EByteOrderMark.bom_UTF_32_BE Or _
-       e = EByteOrderMark.bom_GB_18030 Or _
-       e = EByteOrderMark.bom_UTF_EBCDIC Or _
-       e = EByteOrderMark.bom_UTF_32_LE Then EByteOrderMark_Parse = e: Exit Function
-    
-    e = Value And &HFFFFFF
-    If e = EByteOrderMark.bom_SCSU Or _
-       e = EByteOrderMark.bom_UTF_8 Or _
-       e = EByteOrderMark.bom_BOCU_1 Or _
-       e = EByteOrderMark.bom_UTF_1 Then EByteOrderMark_Parse = e: Exit Function
-       
-    If e = EByteOrderMark.bom_UTF_7 Then
-        e = Value \ 2 ^ 24 'shiftright 24 bits
-        If e = &H38 Or e = &H39 Or e = &H2B Or e = &H2F Then _
-                    EByteOrderMark_Parse = EByteOrderMark.bom_UTF_7: Exit Function
-    End If
-    
-    e = Value And &HFFFF&
-    If e = EByteOrderMark.bom_UTF_16_BE Or _
-       e = EByteOrderMark.bom_UTF_16_LE Then EByteOrderMark_Parse = e: Exit Function
-    
+'    Dim e  As Long
+'
+'    e = Value
+'    If e = EByteOrderMark.bom_UTF_32_BE Or _
+'       e = EByteOrderMark.bom_GB_18030 Or _
+'       e = EByteOrderMark.bom_UTF_EBCDIC Or _
+'       e = EByteOrderMark.bom_UTF_32_LE Then EByteOrderMark_Parse = e: Exit Function
+'
+'    e = Value And &HFFFFFF
+'    If e = EByteOrderMark.bom_SCSU Or _
+'       e = EByteOrderMark.bom_UTF_8 Or _
+'       e = EByteOrderMark.bom_BOCU_1 Or _
+'       e = EByteOrderMark.bom_UTF_1 Then EByteOrderMark_Parse = e: Exit Function
+'
+'    If e = EByteOrderMark.bom_UTF_7 Then
+'        e = Value \ 2 ^ 24 'shiftright 24 bits
+'        If e = &H38 Or e = &H39 Or e = &H2B Or e = &H2F Then _
+'                    EByteOrderMark_Parse = EByteOrderMark.bom_UTF_7: Exit Function
+'    End If
+'
+'    e = Value And &HFFFF&
+'    If e = EByteOrderMark.bom_UTF_16_BE Or _
+'       e = EByteOrderMark.bom_UTF_16_LE Then EByteOrderMark_Parse = e: Exit Function
+    EByteOrderMark_Parse = Long_IsBOM(Value)
 End Function
 
 Public Function EByteOrderMark_ToStr(ByVal Value As EByteOrderMark) As String
     Dim s As String
-    Dim e As EByteOrderMark
     Select Case Value
-    Case e = bom_BOCU_1:     s = "bom_BOCU_1"
-    Case e = bom_SCSU:       s = "bom_SCSU"
-    Case e = bom_UTF_1:      s = "bom_UTF_1"
-    Case e = bom_UTF_16_BE:  s = "bom_UTF_16_BE"
-    Case e = bom_UTF_16_LE:  s = "bom_UTF_16_LE"
-    Case e = bom_UTF_32_BE:  s = "bom_UTF_32_BE"
-    Case e = bom_UTF_7:      s = "bom_UTF_7"
-    Case e = bom_UTF_8:      s = "bom_UTF_8"
-    Case e = bom_UTF_EBCDIC: s = "bom_UTF_EBCDIC"
+    Case EByteOrderMark.bom_GB_18030:   s = "bom_GB_18030"
+    Case EByteOrderMark.bom_BOCU_1:     s = "bom_BOCU_1"
+    Case EByteOrderMark.bom_SCSU:       s = "bom_SCSU"
+    Case EByteOrderMark.bom_UTF_1:      s = "bom_UTF_1"
+    Case EByteOrderMark.bom_UTF_16_BE:  s = "bom_UTF_16_BE"
+    Case EByteOrderMark.bom_UTF_16_LE:  s = "bom_UTF_16_LE"
+    Case EByteOrderMark.bom_UTF_32_BE:  s = "bom_UTF_32_BE"
+    Case EByteOrderMark.bom_UTF_32_LE:  s = "bom_UTF_32_LE"
+    Case EByteOrderMark.bom_UTF_7:      s = "bom_UTF_7"
+    Case EByteOrderMark.bom_UTF_8:      s = "bom_UTF_8"
+    Case EByteOrderMark.bom_UTF_EBCDIC: s = "bom_UTF_EBCDIC"
     End Select
     EByteOrderMark_ToStr = s
 End Function

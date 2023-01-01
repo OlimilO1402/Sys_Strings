@@ -5,6 +5,15 @@ Begin VB.Form Form1
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   13455
+   BeginProperty Font 
+      Name            =   "Tahoma"
+      Size            =   9
+      Charset         =   0
+      Weight          =   400
+      Underline       =   0   'False
+      Italic          =   0   'False
+      Strikethrough   =   0   'False
+   EndProperty
    Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
    ScaleHeight     =   7695
@@ -21,10 +30,10 @@ Begin VB.Form Form1
    Begin VB.CommandButton BtnTestByteOrderMark 
       Caption         =   "Test ByteOrderMark >>"
       Height          =   375
-      Left            =   11520
+      Left            =   10920
       TabIndex        =   28
       Top             =   480
-      Width           =   1815
+      Width           =   2415
    End
    Begin VB.CommandButton Command1 
       Caption         =   "Some Tests"
@@ -36,6 +45,15 @@ Begin VB.Form Form1
    End
    Begin VB.TextBox Resizer 
       BorderStyle     =   0  'Kein
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   255
       Left            =   13200
       MultiLine       =   -1  'True
@@ -47,18 +65,18 @@ Begin VB.Form Form1
    Begin VB.CommandButton BtnReplaceX 
       Caption         =   "Replace "" ."" -> ""."""
       Height          =   375
-      Left            =   1080
+      Left            =   840
       TabIndex        =   25
       Top             =   480
-      Width           =   1575
+      Width           =   1815
    End
    Begin VB.CommandButton BtnPadLeftRight 
       Caption         =   "PadLeftRight"
       Height          =   375
-      Left            =   9240
+      Left            =   9120
       TabIndex        =   22
       Top             =   5160
-      Width           =   1215
+      Width           =   1335
    End
    Begin VB.TextBox Text7 
       Alignment       =   2  'Zentriert
@@ -82,10 +100,10 @@ Begin VB.Form Form1
    Begin VB.CommandButton BtnResetPadLeftRight 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   9240
+      Left            =   9120
       TabIndex        =   23
       Top             =   4800
-      Width           =   1215
+      Width           =   1335
    End
    Begin VB.TextBox Text6 
       Alignment       =   2  'Zentriert
@@ -109,18 +127,18 @@ Begin VB.Form Form1
    Begin VB.CommandButton BtnPadRight 
       Caption         =   "PadRight"
       Height          =   375
-      Left            =   4680
+      Left            =   4560
       TabIndex        =   20
       Top             =   5160
-      Width           =   1215
+      Width           =   1335
    End
    Begin VB.CommandButton BtnResetPadRight 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   4680
+      Left            =   4560
       TabIndex        =   21
       Top             =   4800
-      Width           =   1215
+      Width           =   1335
    End
    Begin VB.TextBox Text5 
       Alignment       =   2  'Zentriert
@@ -331,6 +349,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+Private Sub BtnTestByteOrderMark_Click()
+    Form2.Show
+End Sub
+
 Private Sub Command1_Click()
     Dim s As String: s = "Dies ist ein Teststring"
     Dim chars() As Integer
@@ -357,6 +379,7 @@ Private Sub Command2_Click()
 End Sub
 
 Private Sub Form_Load()
+    Me.Caption = Me.Caption & " v" & App.Major & "." & App.Minor & "." & App.Revision
     BtnResetDeleteMultiWS_Click
     BtnResetDeleteCRLF_Click
     BtnResetRemoveChars_Click
@@ -367,26 +390,26 @@ Private Sub Form_Load()
 End Sub
 
 Private Sub Form_Resize()
-    Dim L As Single, T As Single, W As Single, H As Single
+    Dim l As Single, T As Single, W As Single, H As Single
     Dim m As Single: m = 8 * Screen.TwipsPerPixelX
     
-    T = BtnInfo.Top: W = BtnInfo.Width: H = BtnInfo.Height: L = Me.ScaleWidth - m - W
-    If W > 0 And H > 0 Then BtnInfo.Move L, T, W, H
+    T = BtnInfo.Top: W = BtnInfo.Width: H = BtnInfo.Height: l = Me.ScaleWidth - m - W
+    If W > 0 And H > 0 Then BtnInfo.Move l, T, W, H
     
-    L = Text1.Left: T = Text1.Top: H = Text1.Height: W = Me.ScaleWidth - m - W - L
-    If W > 0 And H > 0 Then Text1.Move L, T, W, H
+    l = Text1.Left: T = Text1.Top: H = Text1.Height: W = Me.ScaleWidth - m - W - l
+    If W > 0 And H > 0 Then Text1.Move l, T, W, H
     
-    T = Text2.Top: W = Me.ScaleWidth - L - m: H = Text2.Height
-    If W > 0 And H > 0 Then Text2.Move L, T, W, H
+    T = Text2.Top: W = Me.ScaleWidth - l - m: H = Text2.Height
+    If W > 0 And H > 0 Then Text2.Move l, T, W, H
     
     T = Text3.Top: H = Text3.Height
-    If W > 0 And H > 0 Then Text3.Move L, T, W, H
+    If W > 0 And H > 0 Then Text3.Move l, T, W, H
     
     T = Text4.Top: H = Text4.Height
-    If W > 0 And H > 0 Then Text4.Move L, T, W, H
+    If W > 0 And H > 0 Then Text4.Move l, T, W, H
     
-    W = Resizer.Width: H = Resizer.Height: L = Me.ScaleWidth - W: T = Me.ScaleHeight - H:
-    If W > 0 And H > 0 Then Resizer.Move L, T, W, H
+    W = Resizer.Width: H = Resizer.Height: l = Me.ScaleWidth - W: T = Me.ScaleHeight - H:
+    If W > 0 And H > 0 Then Resizer.Move l, T, W, H
 End Sub
 
 Function Max(V1, V2)
