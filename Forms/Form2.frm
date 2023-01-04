@@ -4,10 +4,10 @@ Begin VB.Form Form2
    ClientHeight    =   4395
    ClientLeft      =   19155
    ClientTop       =   3090
-   ClientWidth     =   10425
+   ClientWidth     =   11400
    LinkTopic       =   "Form2"
    ScaleHeight     =   4395
-   ScaleWidth      =   10425
+   ScaleWidth      =   11400
    Begin VB.CommandButton Command1 
       Caption         =   "StringAnsiWin1252"
       Height          =   375
@@ -21,21 +21,21 @@ Begin VB.Form Form2
       Left            =   2160
       TabIndex        =   8
       Top             =   120
-      Width           =   4575
+      Width           =   9135
    End
    Begin VB.TextBox Text5 
       Height          =   375
       Left            =   2160
       TabIndex        =   7
       Top             =   2040
-      Width           =   4575
+      Width           =   9135
    End
    Begin VB.TextBox Text4 
       Height          =   375
       Left            =   2160
       TabIndex        =   6
       Top             =   1560
-      Width           =   4575
+      Width           =   9135
    End
    Begin VB.CommandButton Command5 
       Caption         =   "StringUTF16LE_bom"
@@ -58,14 +58,14 @@ Begin VB.Form Form2
       Left            =   2160
       TabIndex        =   3
       Top             =   1080
-      Width           =   4575
+      Width           =   9135
    End
    Begin VB.TextBox Text2 
       Height          =   375
       Left            =   2160
       TabIndex        =   2
       Top             =   600
-      Width           =   4575
+      Width           =   9135
    End
    Begin VB.CommandButton Command3 
       Caption         =   "StringUTF8_bom"
@@ -93,17 +93,30 @@ Option Explicit
 
 Private Sub Command1_Click()
     Dim FNm As String:  FNm = App.Path & "\StringAnsiWindows1252.txt"
-    Text1.Text = FileReadAllString(FNm)
+    Dim s As String: s = FileReadAllString(FNm)
+'    Dim bom As EByteOrderMark: bom = IsBOM(s, s)
+'    If bom = bom_UTF_8 Then
+'        Dim buffer() As Byte: buffer = s
+'        s = MString.ConvertFromUTF8(buffer)
+'    End If
+    Text1.Text = s
 End Sub
 
 Private Sub Command2_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF8.txt"
-    Text2.Text = FileReadAllString(FNm)
+    Dim s As String: s = FileReadAllString(FNm)
+'    Dim bom As EByteOrderMark: bom = IsBOM(s, s)
+'    If bom = bom_UTF_8 Then
+'        Dim buffer() As Byte: buffer = s
+'        s = MString.ConvertFromUTF8(buffer)
+'    End If
+    Text2.Text = s
 End Sub
 
 Private Sub Command3_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF8_bom.txt"
-    Text3.Text = FileReadAllString(FNm)
+    Dim s As String: s = FileReadAllString(FNm)
+    Text3.Text = s
 End Sub
 
 Private Sub Command4_Click()
@@ -113,17 +126,43 @@ End Sub
 
 Private Sub Command5_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF16LE_bom.txt"
-    Text5.Text = FileReadAllString(FNm)
+    Dim s As String: s = FileReadAllString(FNm)
+    Text5.Text = s
 End Sub
 
 Function FileReadAllString(FNm As String) As String
 Try: On Error GoTo Catch
     Dim FNr As Integer: FNr = FreeFile
-    'Open FNm For Input As FNr
     Open FNm For Binary As FNr
-    Dim FileContent As String: FileContent = Space(LOF(FNr))
+    Dim bom As EByteOrderMark 'Long
+    Get FNr, , bom
+    Dim u As Long: u = LOF(FNr) - 1
+    'If bom <> bom_None Then u = u - MString.E
+    ReDim FileContent(0 To u) As Byte
     Get FNr, , FileContent
-    FileReadAllString = FileContent
+    Dim s As String
+    
+    Select Case bom
+    Case EByteOrderMark.bom_UTF_16_BE
+        'swap the order around
+        s = FileContent
+        MPtr.String_Rotate2 s
+    Case EByteOrderMark.bom_UTF_16_LE
+        'do nothing, string is perfekt as it should be
+    Case EByteOrderMark.bom_UTF_32_BE
+        s = StrConv(FileContent, vbFromUnicode)
+        MPtr.String_Rotate2 s
+    Case EByteOrderMark.bom_UTF_32_LE
+        s = StrConv(FileContent, vbFromUnicode)
+    Case EByteOrderMark.bom_UTF_7
+        
+    Case EByteOrderMark.bom_UTF_8
+        s = MString.ConvertFromUTF8(FileContent)
+    Case EByteOrderMark.bom_UTF_EBCDIC
+        'sorry no solution yet!
+        
+    End Select
+    FileReadAllString = s
     GoTo Finally
 Catch:
     MsgBox Err.Description
