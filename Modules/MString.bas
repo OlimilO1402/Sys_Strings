@@ -103,7 +103,7 @@ End Function
 
 Public Function PtrToString(ByVal pStr As LongPtr, Optional ByVal sLen As Long) As String
     If (pStr = 0) Then Exit Function
-    If sLen <= 0 Then sLen = lstrlenW(pStr)
+    If sLen <= 0 Then sLen = lstrlenW(pStr) '- 1
     PtrToString = Space$(sLen)
     lstrcpyW StrPtr(PtrToString), pStr
     'CoTaskMemFree pStr ' is das so immer richtig?
@@ -329,8 +329,8 @@ Public Function IndexOf(s As String, ByVal Value As String, Optional ByVal start
     If Len(s) < startIndex Then startIndex = Len(s)
     If Count < 0 Then Count = Len(s) - startIndex
     If Len(s) < startIndex + Count - 1 Then Count = Len(s) - startIndex
-    Dim v As String: v = MidB(s, startIndex + 1, (Count + 1) * 2)
-    IndexOf = InStr(1, v, Value, compare) - 1
+    Dim V As String: V = MidB(s, startIndex + 1, (Count + 1) * 2)
+    IndexOf = InStr(1, V, Value, compare) - 1
     If IndexOf > 0 Then IndexOf = startIndex + IndexOf - 1
 End Function
 
@@ -382,12 +382,17 @@ Function PadLeft(this As String, ByVal totalWidth As Long, Optional ByVal paddin
     End If
 End Function
 
+Function CHexToVBHex(ByVal s As String) As String
+    CHexToVBHex = s
+    If Left(s, 2) = "0x" Then CHexToVBHex = "&H" & Mid$(s, 3)
+End Function
+
 Function PadRight(this As String, ByVal totalWidth As Long, Optional ByVal paddingChar As String) As String
     
-    ' Returns the String StrVal with the specified length.
+    ' Returns the String this with the specified length.
     ' totalWidth: the length of the returned string
-    '             if totalWidth is smaller then the length of StrVal then
-    '             StrVal will be returned
+    '             if totalWidth is smaller then the length of this then
+    '             this will be returned
     ' padChar:    on the right hand side it will be filed up with padChar
     '             if padChar is not specified, the returned string will be
     '             filled up with spaces.
@@ -496,7 +501,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
     'ist startindex 1-basiert?
     'If startIndex = 0 And Count = -1 Then
     'Dim pos As Long: pos = Len(s) - startIndex
-    Dim l As Long: l = Len(s)
+    Dim L As Long: L = Len(s)
     If Count < 0 Then
         If startIndex < 0 Then
             Remove = ""
@@ -507,11 +512,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = ""
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left$(s, startIndex)
             Exit Function
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             Exit Function
         End If
@@ -529,11 +534,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = s
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = s
             Exit Function
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             Exit Function
         End If
@@ -541,7 +546,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count < l Then
+    If Count < L Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -551,22 +556,22 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < l Then
-            If startIndex + Count < l Then
+        If startIndex < L Then
+            If startIndex + Count < L Then
                 Remove = Left(s, startIndex) & Mid(s, startIndex + Count + 1)
                 Exit Function
             End If
-            If startIndex + Count = l Then
+            If startIndex + Count = L Then
                 Remove = Left(s, startIndex)
                 Exit Function
             End If
-            If l < startIndex + Count Then
+            If L < startIndex + Count Then
                 Remove = Left(s, startIndex)
                 'Error message
                 Exit Function
             End If
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             'Error message
             Exit Function
@@ -575,7 +580,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count = l Then
+    If Count = L Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -585,13 +590,13 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = "" 'Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left$(s, startIndex)
             'Error message
             Exit Function
         End If
     End If
-    If l < Count Then
+    If L < Count Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -602,7 +607,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             'Error message
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left(s, startIndex)
             'Error message
             Exit Function
@@ -664,11 +669,11 @@ End Function
 '                                     ' optional gefolgt von          ÿ
 Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOrderMark
     'checks if s starts with any BOM, returns the bom, andalso returns the rest of the string if there is anything left
-    Dim l As Long: l = Len(s)
-    If l < 2 Then Exit Function
+    Dim L As Long: L = Len(s)
+    If L < 2 Then Exit Function
     Dim c1 As Byte: c1 = Asc(Mid(s, 1, 1))
     Dim c2 As Byte: c2 = Asc(Mid(s, 2, 1))
-    If l = 2 Then
+    If L = 2 Then
         Dim ibom As Integer
         ibom = CInt("&H" & Hex2(c2) & Hex2(c1))
         If ibom = EByteOrderMark.bom_UTF_16_BE Or ibom = EByteOrderMark.bom_UTF_16_LE Then
@@ -677,7 +682,7 @@ Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOr
     End If
     Dim c3 As Byte, c4 As Byte
     Dim lbom As Long
-    If l > 2 Then
+    If L > 2 Then
         c3 = Asc(Mid(s, 3, 1))
         lbom = CLng("&H" & Hex2(c3) & Hex2(c2) & Hex2(c1))
         If Long_IsBOM(lbom) Then
@@ -686,7 +691,7 @@ Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOr
             Exit Function
         End If
     End If
-    If l > 3 Then
+    If L > 3 Then
         c4 = Asc(Mid(s, 4, 1))
         lbom = CLng("&H" & Hex2(c4) & Hex2(c3) & Hex2(c2) & Hex2(c1))
         If Long_IsBOM(lbom) Then
@@ -801,5 +806,4 @@ Public Function MsgBoxW(Prompt, Optional ByVal Buttons As VbMsgBoxStyle = vbOKOn
     Title = IIf(IsMissing(Title), App_EXEName, CStr(Title))
     MsgBoxW = MessageBoxW(0, StrPtr(Prompt), StrPtr(Title), Buttons)
 End Function
-
 
