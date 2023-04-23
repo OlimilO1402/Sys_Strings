@@ -47,9 +47,9 @@ Private Const CP_UTF8 As Long = 65001
     Private Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (ByRef pDst As Any, ByRef pSrc As Any, ByVal BytLen As Long)
 #Else
     'https://learn.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-widechartomultibyte
-    Private Declare Function WideCharToMultiByte Lib "kernel32.dll" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpDefaultChar As LongPtr, ByVal lpUsedDefaultChar As LongPtr) As Long
+    Private Declare Function WideCharToMultiByte Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpDefaultChar As LongPtr, ByVal lpUsedDefaultChar As LongPtr) As Long
     'https://learn.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-multibytetowidechar
-    Private Declare Function MultiByteToWideChar Lib "kernel32.dll" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long) As Long
+    Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpMultiByteStr As LongPtr, ByVal cbMultiByte As Long, ByVal lpWideCharStr As LongPtr, ByVal cchWideChar As Long) As Long
     Private Declare Function lstrlenW Lib "kernel32" (ByVal lpString As LongPtr) As Long
     Private Declare Function lstrcpyW Lib "kernel32" (ByVal pDst As LongPtr, ByVal pSrc As LongPtr) As Long
     Private Declare Function MessageBoxW Lib "user32" (ByVal hwnd As LongPtr, ByVal lpText As LongPtr, ByVal lpCaption As LongPtr, ByVal wType As Long) As Long
@@ -67,6 +67,8 @@ End Type
 #If False Then
     Value
 #End If
+Public DecimalSeparator As String
+
 'VB does automatic in and out Ansi/Unicode conversion when calling winapi-functions with parameters of type String
 'you can simulate this behaviour by using StrPtrWA in the call and WACorr afterwards
 'Public Function StrPtrWA(ByRef s_inout As String) As LongPtr
@@ -288,6 +290,17 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
+Public Function Decimal_TryParse(ByVal Value As String, ByRef dec_out) As Boolean
+Try: On Error GoTo Catch
+    If Len(DecimalSeparator) = 0 Then DecimalSeparator = Mid(CStr(0.1), 2, 1)
+    Value = Replace(Value, ",", DecimalSeparator)
+    Value = Replace(Value, ".", DecimalSeparator)
+    dec_out = CDec(Value)
+    Decimal_TryParse = True
+    Exit Function
+Catch:
+End Function
+
 Public Function Hex2(ByVal Value As Byte) As String
     Hex2 = Hex(Value): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
@@ -329,8 +342,8 @@ Public Function IndexOf(s As String, ByVal Value As String, Optional ByVal start
     If Len(s) < startIndex Then startIndex = Len(s)
     If Count < 0 Then Count = Len(s) - startIndex
     If Len(s) < startIndex + Count - 1 Then Count = Len(s) - startIndex
-    Dim V As String: V = MidB(s, startIndex + 1, (Count + 1) * 2)
-    IndexOf = InStr(1, V, Value, compare) - 1
+    Dim v As String: v = MidB(s, startIndex + 1, (Count + 1) * 2)
+    IndexOf = InStr(1, v, Value, compare) - 1
     If IndexOf > 0 Then IndexOf = startIndex + IndexOf - 1
 End Function
 
@@ -787,14 +800,15 @@ Public Property Get App_EXEName() As String
 End Property
 
 Public Function GetGreekAlphabet() As String
+    'returns the greek alphabet all upper- and lower-case letters
     Dim s As String
     Dim i As Long
-    Dim alp As Long: alp = 913 'der Große griechische Buchstabe Alpha
+    Dim alp As Long: alp = 913 'the upper greek letter Alpha = 913
     For i = alp To alp + 24
         s = s & ChrW(i)
     Next
     s = s & " "
-    alp = alp + 32             'der Kleine griechische Buchstabe alpha
+    alp = alp + 32             'the lower greek letter alpha = 945
     For i = alp To alp + 24
         s = s & ChrW(i)
     Next
@@ -805,5 +819,48 @@ Public Function MsgBoxW(Prompt, Optional ByVal Buttons As VbMsgBoxStyle = vbOKOn
 'Public Function MsgBoxW(Prompt, Optional ByVal Buttons As VbMsgBoxStyle = vbOKOnly, Optional Title, Optional Helpfile, Optional Context) As VbMsgBoxResult
     Title = IIf(IsMissing(Title), App_EXEName, CStr(Title))
     MsgBoxW = MessageBoxW(0, StrPtr(Prompt), StrPtr(Title), Buttons)
+End Function
+
+Public Function GetTabbedText(s As String, Optional onlyNewLine As Boolean = False, Optional NumOnly As Boolean = False) As String
+    'takes any string, first replaces any vbtab into normal space
+    'then separates every value in the string with tabs, lines with vbcrlf
+    Dim T As String: T = Replace(s, vbTab, " ")
+    Dim lines() As String: lines = Split(T, vbCrLf)
+    Dim i As Long
+    'Dim onlyNewLine As Boolean: onlyNewLine = False 'Me.cbNewlineOnly.Value
+    Dim svbCrLf As String: If onlyNewLine Then svbCrLf = vbCrLf
+    'jeden Wert in eine neue Zeile
+    For i = LBound(lines) To UBound(lines)
+        Dim line As String
+        'alle mehrfachen Whitespaces enfernen
+        line = DeleteMultiWS(lines(i))
+        'für Excel: alle Zahlen mit Komma(",") statt Punkt(".")
+        line = Replace(line, ".", ",")
+        If NumOnly Then
+            Dim sa() As String: sa = Split(line, " ")
+            Dim j As Long, u As Long: u = UBound(sa)
+            line = ""
+            For j = 0 To u
+                If IsNumeric(sa(j)) Then
+                    line = line & sa(j) & svbCrLf
+                    If onlyNewLine Then
+                        'line = line & vbNewLine
+                    Else
+                        If j < u Then
+                            line = line & vbTab '" "
+                        End If
+                    End If
+                End If
+            Next
+        Else
+            If onlyNewLine Then
+                line = Replace(line, " ", vbCrLf)
+            Else
+                line = Replace(line, " ", vbTab)
+            End If
+        End If
+        lines(i) = line
+    Next
+    GetTabbedText = Join(lines, vbCrLf)
 End Function
 
