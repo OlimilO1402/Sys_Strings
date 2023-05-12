@@ -275,6 +275,7 @@ End Function
 
 Public Function Double_TryParse(ByVal Value As String, ByRef d_out As Double) As Boolean
 Try: On Error GoTo Catch
+    Value = Replace(Value, "­", "-") 'replace &HC2AD with &H2D
     Value = Replace(Value, ",", ".")
     d_out = Val(Value)
     Double_TryParse = True
@@ -836,6 +837,9 @@ Public Function GetTabbedText(s As String, Optional onlyNewLine As Boolean = Fal
         line = DeleteMultiWS(lines(i))
         'für Excel: alle Zahlen mit Komma(",") statt Punkt(".")
         line = Replace(line, ".", ",")
+        If Left(line, 3) = "K45" Then
+            Debug.Assert True
+        End If
         If NumOnly Then
             Dim sa() As String: sa = Split(line, " ")
             Dim j As Long, u As Long: u = UBound(sa)
