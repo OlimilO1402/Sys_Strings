@@ -302,6 +302,21 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
+Public Function Long_TryParse(ByVal Value As String, ByRef lng_out As Long) As Boolean
+Try: On Error GoTo Catch
+    lng_out = CLng(Value)
+    Long_TryParse = True
+    Exit Function
+Catch:
+End Function
+
+Public Function Integer_TryParse(ByVal Value As String, ByRef int_out As Integer) As Boolean
+Try: On Error GoTo Catch
+    int_out = CInt(Value)
+    Integer_TryParse = True
+    Exit Function
+Catch:
+End Function
 Public Function Hex2(ByVal Value As Byte) As String
     Hex2 = Hex(Value): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
