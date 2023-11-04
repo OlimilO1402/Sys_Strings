@@ -416,6 +416,22 @@ Function CHexToVBHex(ByVal s As String) As String
     If Left(s, 2) = "0x" Then CHexToVBHex = "&H" & Mid$(s, 3)
 End Function
 
+Public Function PadCentered(this As String, ByVal totalWidth As Long, Optional ByVal paddingChar As String) As String
+    Dim StringLength As Long: StringLength = Len(this)
+    If StringLength > totalWidth Then
+        PadCentered = this
+    Else
+        Dim l As Long: l = (totalWidth - StringLength) \ 2
+        Dim r As Long: r = (totalWidth - StringLength) / 2
+        If Len(paddingChar) Then
+            PadCentered = String$(l, paddingChar) & this & String$(r, paddingChar)
+        Else
+            PadCentered = Space$(totalWidth)
+            RSet Center = this & Space$(r)
+        End If
+    End If
+End Function
+
 Function PadRight(this As String, ByVal totalWidth As Long, Optional ByVal paddingChar As String) As String
     
     ' Returns the String this with the specified length.
@@ -530,7 +546,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
     'ist startindex 1-basiert?
     'If startIndex = 0 And Count = -1 Then
     'Dim pos As Long: pos = Len(s) - startIndex
-    Dim L As Long: L = Len(s)
+    Dim l As Long: l = Len(s)
     If Count < 0 Then
         If startIndex < 0 Then
             Remove = ""
@@ -541,11 +557,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = ""
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left$(s, startIndex)
             Exit Function
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             Exit Function
         End If
@@ -563,11 +579,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = s
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = s
             Exit Function
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             Exit Function
         End If
@@ -575,7 +591,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count < L Then
+    If Count < l Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -585,22 +601,22 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < L Then
-            If startIndex + Count < L Then
+        If startIndex < l Then
+            If startIndex + Count < l Then
                 Remove = Left(s, startIndex) & Mid(s, startIndex + Count + 1)
                 Exit Function
             End If
-            If startIndex + Count = L Then
+            If startIndex + Count = l Then
                 Remove = Left(s, startIndex)
                 Exit Function
             End If
-            If L < startIndex + Count Then
+            If l < startIndex + Count Then
                 Remove = Left(s, startIndex)
                 'Error message
                 Exit Function
             End If
         End If
-        If startIndex = L Then
+        If startIndex = l Then
             Remove = s
             'Error message
             Exit Function
@@ -609,7 +625,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count = L Then
+    If Count = l Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -619,13 +635,13 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = "" 'Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left$(s, startIndex)
             'Error message
             Exit Function
         End If
     End If
-    If L < Count Then
+    If l < Count Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -636,7 +652,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             'Error message
             Exit Function
         End If
-        If startIndex < L Then
+        If startIndex < l Then
             Remove = Left(s, startIndex)
             'Error message
             Exit Function
@@ -670,7 +686,7 @@ End Sub
 
 Public Function AdverbNum_ToStr(ByVal num As Byte) As String
     Static sa(0 To 11) As String
-    If Len(sa(1)) = 0 Then SCArray sa, "first", "second", "third", "fourth", "fifth", "sixt", "seventh", "eigth", "nineth", "tenth", "eleventh", "twelfeth"
+    If Len(sa(1)) = 0 Then SCArray sa, "first", "second", "third", "fourth", "fifth", "sixt", "seventh", "eigth", "nineth", "tenth", "eleventh", "twelfth"
     AdverbNum_ToStr = sa(num - 1)
 End Function
 
@@ -698,11 +714,11 @@ End Function
 '                                     ' optional gefolgt von          ÿ
 Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOrderMark
     'checks if s starts with any BOM, returns the bom, andalso returns the rest of the string if there is anything left
-    Dim L As Long: L = Len(s)
-    If L < 2 Then Exit Function
+    Dim l As Long: l = Len(s)
+    If l < 2 Then Exit Function
     Dim c1 As Byte: c1 = Asc(Mid(s, 1, 1))
     Dim c2 As Byte: c2 = Asc(Mid(s, 2, 1))
-    If L = 2 Then
+    If l = 2 Then
         Dim ibom As Integer
         ibom = CInt("&H" & Hex2(c2) & Hex2(c1))
         If ibom = EByteOrderMark.bom_UTF_16_BE Or ibom = EByteOrderMark.bom_UTF_16_LE Then
@@ -711,7 +727,7 @@ Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOr
     End If
     Dim c3 As Byte, c4 As Byte
     Dim lbom As Long
-    If L > 2 Then
+    If l > 2 Then
         c3 = Asc(Mid(s, 3, 1))
         lbom = CLng("&H" & Hex2(c3) & Hex2(c2) & Hex2(c1))
         If Long_IsBOM(lbom) Then
@@ -720,7 +736,7 @@ Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOr
             Exit Function
         End If
     End If
-    If L > 3 Then
+    If l > 3 Then
         c4 = Asc(Mid(s, 4, 1))
         lbom = CLng("&H" & Hex2(c4) & Hex2(c3) & Hex2(c2) & Hex2(c1))
         If Long_IsBOM(lbom) Then

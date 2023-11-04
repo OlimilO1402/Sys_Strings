@@ -4,7 +4,7 @@ Begin VB.Form Form1
    ClientHeight    =   7695
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   13455
+   ClientWidth     =   15375
    BeginProperty Font 
       Name            =   "Tahoma"
       Size            =   9
@@ -17,14 +17,49 @@ Begin VB.Form Form1
    Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
    ScaleHeight     =   7695
-   ScaleWidth      =   13455
+   ScaleWidth      =   15375
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton BtnPadCentered 
+      Caption         =   "PadCentered"
+      Height          =   375
+      Left            =   11520
+      TabIndex        =   30
+      Top             =   5160
+      Width           =   1335
+   End
+   Begin VB.CommandButton BtnResetPadCentered 
+      Caption         =   "Reset"
+      Height          =   375
+      Left            =   11520
+      TabIndex        =   32
+      Top             =   4800
+      Width           =   1335
+   End
+   Begin VB.TextBox Text8 
+      Alignment       =   2  'Zentriert
+      BeginProperty Font 
+         Name            =   "Consolas"
+         Size            =   9.75
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   2835
+      Left            =   12840
+      MultiLine       =   -1  'True
+      ScrollBars      =   3  'Beides
+      TabIndex        =   31
+      Top             =   4800
+      Width           =   2415
+   End
    Begin VB.CommandButton Command2 
       Caption         =   "Command2"
       Height          =   495
-      Left            =   120
+      Left            =   0
       TabIndex        =   29
-      Top             =   6000
+      Top             =   1920
       Width           =   1215
    End
    Begin VB.CommandButton BtnTestByteOrderMark 
@@ -38,9 +73,9 @@ Begin VB.Form Form1
    Begin VB.CommandButton Command1 
       Caption         =   "Some Tests"
       Height          =   375
-      Left            =   120
+      Left            =   1320
       TabIndex        =   27
-      Top             =   7200
+      Top             =   2040
       Width           =   1215
    End
    Begin VB.TextBox Resizer 
@@ -73,7 +108,7 @@ Begin VB.Form Form1
    Begin VB.CommandButton BtnPadLeftRight 
       Caption         =   "PadLeftRight"
       Height          =   375
-      Left            =   9120
+      Left            =   7680
       TabIndex        =   22
       Top             =   5160
       Width           =   1335
@@ -90,17 +125,17 @@ Begin VB.Form Form1
          Strikethrough   =   0   'False
       EndProperty
       Height          =   2835
-      Left            =   10560
+      Left            =   9000
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   24
       Top             =   4800
-      Width           =   2775
+      Width           =   2415
    End
    Begin VB.CommandButton BtnResetPadLeftRight 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   9120
+      Left            =   7680
       TabIndex        =   23
       Top             =   4800
       Width           =   1335
@@ -117,17 +152,17 @@ Begin VB.Form Form1
          Strikethrough   =   0   'False
       EndProperty
       Height          =   2835
-      Left            =   6000
+      Left            =   5160
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   19
       Top             =   4800
-      Width           =   2775
+      Width           =   2415
    End
    Begin VB.CommandButton BtnPadRight 
       Caption         =   "PadRight"
       Height          =   375
-      Left            =   4560
+      Left            =   3840
       TabIndex        =   20
       Top             =   5160
       Width           =   1335
@@ -135,7 +170,7 @@ Begin VB.Form Form1
    Begin VB.CommandButton BtnResetPadRight 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   4560
+      Left            =   3840
       TabIndex        =   21
       Top             =   4800
       Width           =   1335
@@ -152,12 +187,12 @@ Begin VB.Form Form1
          Strikethrough   =   0   'False
       EndProperty
       Height          =   2835
-      Left            =   1440
+      Left            =   1320
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   16
       Top             =   4800
-      Width           =   2775
+      Width           =   2415
    End
    Begin VB.CommandButton BtnPadLeft 
       Caption         =   "PadLeft"
@@ -555,3 +590,21 @@ Private Sub BtnPadLeftRight_Click()
     Next
     Text7.Text = Join(sa, vbCrLf)
 End Sub
+
+''' v ############################## v ''' Test 7 ''' v ############################## v '''
+Private Sub BtnResetPadCentered_Click()
+    Randomize
+    ReDim sa(0 To 9) As String
+    Dim i As Long
+    For i = 0 To UBound(sa)
+        'Value1 = Int(Rnd() * 10& ^ (Rnd * 10&))
+        'Value2 = CLng(Rnd() * 10) / (10& ^ (Rnd() * 10))
+        sa(i) = CStr(Value1) & Format(Value2, "." & String(Rnd * 10, "#"))
+    Next
+    Text8.Text = Join(sa, vbCrLf)
+End Sub
+
+Private Sub BtnPadCentered_Click()
+    '
+End Sub
+
