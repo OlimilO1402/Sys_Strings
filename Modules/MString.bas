@@ -427,7 +427,7 @@ Public Function PadCentered(this As String, ByVal totalWidth As Long, Optional B
             PadCentered = String$(l, paddingChar) & this & String$(r, paddingChar)
         Else
             PadCentered = Space$(totalWidth)
-            RSet Center = this & Space$(r)
+            RSet PadCentered = this & Space$(r)
         End If
     End If
 End Function
