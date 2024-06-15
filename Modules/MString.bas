@@ -143,6 +143,29 @@ Public Function IsHex(s As String) As Boolean
     IsHex = True
 End Function
 
+Public Function IsOct(s As String) As Boolean
+    Dim i As Long
+    For i = 1 To Len(s)
+        Select Case Asc(Mid(s, i, 1))
+        Case 48 To 55:  ' 0 - 7 OK weiter
+        Case Else: Exit Function
+        End Select
+    Next
+    IsHex = True
+End Function
+
+Public Function IsBin(s As String) As Boolean
+    Dim i As Long
+    For i = 1 To Len(s)
+        Select Case Asc(Mid(s, i, 1))
+        Case 48:
+        Case 49:  ' 0 oder 1 OK weiter
+        Case Else: Exit Function
+        End Select
+    Next
+    IsHex = True
+End Function
+
 'Dim fnam As String: fnam = Left(lpElfe.lfFontName, lstrlenW(lpElfe.lfFontName(0)))
 
 'Private Function CreateGUID() As String
@@ -235,6 +258,7 @@ End Function
 'Converters to or from String
 'Bool
 Public Function BoolToYesNo(ByVal b As Boolean) As String
+    'BoolToYesNo = IIf(b, "yes ", " no ")
     BoolToYesNo = IIf(b, " Ja ", "Nein")
 End Function
 
@@ -273,50 +297,251 @@ Public Function BolToStr(ByVal b As Boolean) As String
     If b Then BolToStr = "True" Else BolToStr = "False"
 End Function
 
-Public Function Double_TryParse(ByVal Value As String, ByRef d_out As Double) As Boolean
+' v ############################## v '    TryParse Functions    ' v ############################## v '
+Public Function Byte_TryParse(ByVal Value As String, ByRef Value_out As Byte) As Boolean
 Try: On Error GoTo Catch
-    Value = Replace(Value, "­", "-") 'replace &HC2AD with &H2D
-    Value = Replace(Value, ",", ".")
-    d_out = Val(Value)
-    Double_TryParse = True
-Catch:
-End Function
-
-Public Function Single_TryParse(ByVal Value As String, ByRef s_out As Single) As Boolean
-Try: On Error GoTo Catch
-    Value = Replace(Value, ",", ".")
-    s_out = CSng(Val(Value))
-    Single_TryParse = True
+    Value_out = CByte(Value)
+    Byte_TryParse = True
     Exit Function
 Catch:
 End Function
 
-Public Function Decimal_TryParse(ByVal Value As String, ByRef dec_out) As Boolean
+Public Function Integer_TryParse(ByVal Value As String, ByRef Value_out As Integer) As Boolean
 Try: On Error GoTo Catch
-    If Len(DecimalSeparator) = 0 Then DecimalSeparator = Mid(CStr(0.1), 2, 1)
-    Value = Replace(Value, ",", DecimalSeparator)
-    Value = Replace(Value, ".", DecimalSeparator)
-    dec_out = CDec(Value)
-    Decimal_TryParse = True
+    Value = Trim(Value)
+    If Right(Value, 1) = "%" Then Value = Left(Value, Len(Value) - 1)
+    Value_out = CInt(Value)
+    Integer_TryParse = True
     Exit Function
 Catch:
 End Function
 
-Public Function Long_TryParse(ByVal Value As String, ByRef lng_out As Long) As Boolean
+Public Function Boolean_TryParse(ByVal Value As String, ByRef Value_out As Boolean) As Boolean
 Try: On Error GoTo Catch
-    lng_out = CLng(Value)
+    Value_out = CBool(Value)
+    Boolean_TryParse = True
+    Exit Function
+Catch:
+End Function
+
+Public Function IntHex_TryParse(ByVal Value As String, ByRef Value_out As Integer) As Boolean
+Try: On Error GoTo Catch
+    Value = Trim(Value)
+    If Not IsHex(Value) Then Exit Function
+    Dim vt As VbVarType
+    If VBTypeIdentifier_TryParse(Value, vt) Then
+        If vt <> vbInteger Then Exit Function
+    End If
+    Value_out = CInt(Value)
+    IntHex_TryParse = True
+Catch:
+End Function
+
+Public Function Long_TryParse(ByVal Value As String, ByRef Value_out As Long) As Boolean
+Try: On Error GoTo Catch
+    Value = Trim(Value)
+    If Right(Value, 1) = "&" Then Value = Left(Value, Len(Value) - 1)
+    Value_out = CLng(Value)
     Long_TryParse = True
     Exit Function
 Catch:
 End Function
 
-Public Function Integer_TryParse(ByVal Value As String, ByRef int_out As Integer) As Boolean
+#If VBA7 Then
+Public Function LongLong_TryParse(ByVal Value As String, ByRef Value_out As LongLong) As Boolean
 Try: On Error GoTo Catch
-    int_out = CInt(Value)
-    Integer_TryParse = True
+    Value_out = CLng(Value)
+    Long_TryParse = True
     Exit Function
 Catch:
 End Function
+#End If
+
+Public Function Single_TryParse(ByVal Value As String, ByRef Value_out As Single) As Boolean
+Try: On Error GoTo Catch
+    Value = Trim(Value)
+    If Right(Value, 1) = "!" Then Value = Left(Value, Len(Value) - 1)
+    Value = Replace(Value, ",", ".")
+    Value_out = CSng(Val(Value))
+    Single_TryParse = True
+    Exit Function
+Catch:
+End Function
+
+Public Function Double_TryParse(ByVal Value As String, ByRef Value_out As Double) As Boolean
+Try: On Error GoTo Catch
+    Value = Trim(Value)
+    If Right(Value, 1) = "#" Then Value = Left(Value, Len(Value) - 1)
+    Value = Replace(Value, "­", "-") 'replace &HC2AD with &H2D
+    Value = Replace(Value, ",", ".")
+    Value_out = Val(Value)
+    Double_TryParse = True
+Catch:
+End Function
+
+Public Function Date_TryParse(ByVal Value As String, Value_out) As Boolean
+Try: On Error GoTo Catch
+    Value_out = CDate(Value)
+    Date_TryParse = True
+Catch:
+End Function
+
+Public Function Currency_TryParse(ByVal Value As String, ByRef Value_out As Currency) As Boolean
+Try: On Error GoTo Catch
+    Value = Trim(Value)
+    If Right(Value, 1) = "@" Then Value = Left(Value, Len(Value) - 1)
+    Value = Replace(Value, "­", "-") 'replace &HC2AD with &H2D
+    Dim ds As String: ds = GetDecimalSeparator
+    Value = Replace(Value, ",", ds)
+    Value = Replace(Value, ".", ds)
+    Value_out = CCur(Value)
+    Currency_TryParse = True
+Catch:
+End Function
+
+Public Function Decimal_TryParse(ByVal Value As String, ByRef Value_out) As Boolean
+Try: On Error GoTo Catch
+    If Len(DecimalSeparator) = 0 Then DecimalSeparator = Mid(CStr(0.1), 2, 1)
+    Value = Replace(Value, ",", DecimalSeparator)
+    Value = Replace(Value, ".", DecimalSeparator)
+    Value_out = CDec(Value)
+    Decimal_TryParse = True
+    Exit Function
+Catch:
+End Function
+
+Public Function String_TryParse(ByVal s As String, Value_out) As Boolean
+Try: On Error GoTo Catch
+    If Left(s, 1) = """" And Right(s, 1) = """" Then
+        Value_out = s
+        String_TryParse = True
+    End If
+Catch:
+End Function
+
+Public Function Array_TryParse(ByVal s As String, Value_out, Optional ByVal Delimiter = vbTab) As Boolean
+Try: On Error GoTo Catch
+    Value_out = Split(s, Delimiter)
+    Array_TryParse = True
+    Exit Function
+Catch:
+End Function
+
+Public Function Array_ToStr(Arr) As String
+    Dim i As Long, s As String: s = "("
+    If IsObject(Arr(0)) Then
+        For i = LBound(Arr) To UBound(Arr)
+            s = s & Arr(i).ToStr & "; "
+        Next
+    Else
+        For i = LBound(Arr) To UBound(Arr)
+            s = s & CStr(Arr(i)) & "; "
+        Next
+    End If
+    Array_ToStr = s & ")"
+End Function
+
+Public Function CheckType(ByVal s As String, ByVal vt As VbVarType, Value_out) As Boolean
+    Select Case vt
+    Case VbVarType.vbByte:        Dim BytVal As Byte:     CheckType = Byte_TryParse(s, BytVal):      Value_out = BytVal
+    Case VbVarType.vbInteger:     Dim IntVal As Integer:  CheckType = Integer_TryParse(s, IntVal):   Value_out = IntVal
+    Case VbVarType.vbBoolean:     Dim BolVal As Boolean:  CheckType = Boolean_TryParse(s, BolVal):   Value_out = BolVal
+    Case VbVarType.vbLong:        Dim LngVal As Long:     CheckType = Long_TryParse(s, LngVal):      Value_out = LngVal
+    Case VbVarType.vbSingle:      Dim SngVal As Single:   CheckType = Single_TryParse(s, SngVal):    Value_out = SngVal
+    Case VbVarType.vbDouble:      Dim DblVal As Double:   CheckType = Double_TryParse(s, DblVal):    Value_out = DblVal
+    Case VbVarType.vbCurrency:    Dim CurVal As Currency: CheckType = Currency_TryParse(s, CurVal):  Value_out = CurVal
+    Case VbVarType.vbDecimal:     Dim DecVal As Variant:  CheckType = Decimal_TryParse(s, DecVal):   Value_out = DecVal
+    Case VbVarType.vbDate:        Dim DatVal As Date:     CheckType = Date_TryParse(s, DatVal):      Value_out = DatVal
+    Case VbVarType.vbString:      Dim StrVal As String:   CheckType = String_TryParse(s, StrVal):    Value_out = StrVal
+    Case VbVarType.vbArray:       Dim ArrVal As Variant:  CheckType = Array_TryParse(s, ArrVal):     Value_out = ArrVal
+    End Select
+End Function
+
+Public Function VBVarType_TryParse(ByVal s As String, vt_out As VbVarType) As Boolean
+    VBVarType_TryParse = True
+    s = UCase(Trim(s))
+    Select Case s
+    Case "INTEGER:          vt_out = VbVarType.vbInteger"
+    Case "LONG":            vt_out = VbVarType.vbLong
+    Case "SINGLE":          vt_out = VbVarType.vbSingle
+    Case "DOUBLE":          vt_out = VbVarType.vbDouble
+    Case "CURRENCY":        vt_out = VbVarType.vbCurrency
+    Case "DATE":            vt_out = VbVarType.vbDate
+    Case "STRING":          vt_out = VbVarType.vbString
+    Case "OBJECT":          vt_out = VbVarType.vbObject
+    Case "ERR":             vt_out = VbVarType.vbError
+    Case "ERROR":           vt_out = VbVarType.vbError
+    Case "BOOLEAN":         vt_out = VbVarType.vbBoolean
+    Case "VARIANT":         vt_out = VbVarType.vbVariant
+    Case "DATAOBJECT":      vt_out = VbVarType.vbDataObject
+    Case "DECIMAL":         vt_out = VbVarType.vbDecimal
+    Case "BYTE":            vt_out = VbVarType.vbByte
+    Case "USERDEFINEDTYPE": vt_out = VbVarType.vbUserDefinedType
+    Case "ARRAY":           vt_out = VbVarType.vbArray
+    Case Else: VBVarType_TryParse = False
+    End Select
+End Function
+
+Public Function VBVarType_ToStr(ByVal vt As VbVarType) As String
+    Dim s As String
+    Select Case vt
+    Case VbVarType.vbByte:     s = "Byte"
+    Case VbVarType.vbInteger:  s = "Integer"
+    Case VbVarType.vbLong:     s = "Long"
+    Case VbVarType.vbCurrency: s = "Currency"
+    Case VbVarType.vbSingle:   s = "Single"
+    Case VbVarType.vbDouble:   s = "Double"
+    Case VbVarType.vbDate:     s = "Date"
+    Case VbVarType.vbDecimal:  s = "Decimal"
+    Case VbVarType.vbString:   s = "String"
+    Case VbVarType.vbObject:   s = "Object"
+    Case VbVarType.vbVariant:  s = "Variant"
+    End Select
+    VBVarType_ToStr = s
+End Function
+
+'https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/data-type-summary
+Public Function VBTypeIdentifier_TryParse(s As String, vt_out As VbVarType) As Boolean
+'%   Ganze Zahl  Dim L%
+'&   Long        Dim M&
+'^   LongLong    Dim N^
+'@   Währung     Const W@ = 37.5
+'!   Single      Dim Q!
+'#   Gleitkommawert mit doppelter Genauigkeit
+'                Dim X#
+'$   String      Dim V$ = "Secret"
+    
+    'returns true if s has a postfix-type-identifier,
+    'the corresponding datatype will be returned in vt_out
+    'in a second step check if the value matches the type identifier
+    
+    If Len(s) = 0 Then Exit Function
+    Dim b As Boolean, ti As String: ti = Right(s, 1)
+    Select Case ti
+    Case "%": vt_out = VbVarType.vbInteger:  b = True
+    Case "&": vt_out = VbVarType.vbLong:     b = True
+#If VBA7 Then
+    Case "^": vt_out = VbVarType.vbLongLong: b = True
+#End If
+    Case "@": vt_out = VbVarType.vbCurrency: b = True
+    Case "!": vt_out = VbVarType.vbSingle:   b = True
+    Case "#": vt_out = VbVarType.vbDouble:   b = True
+    Case "$": vt_out = VbVarType.vbString:   b = True
+    End Select
+    VBTypeIdentifier_TryParse = b
+End Function
+
+Public Function Numeric_TryParse(ByVal s As String, v_out As Variant) As Boolean
+    If IsHex(s) Then
+    
+End Function
+
+Public Function Value_TryParse(s As String, v_out As Variant) As Boolean
+    
+End Function
+
+' ^ ############################## ^ '    TryParse Functions    ' ^ ############################## ^ '
+
 Public Function Hex2(ByVal Value As Byte) As String
     Hex2 = Hex(Value): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
@@ -337,6 +562,14 @@ End Function
 
 Public Function Contains(s As String, ByVal Value As String) As Boolean
     Contains = InStr(1, s, Value) > 0
+End Function
+
+Public Function ContainsOneOf(s As String, Values() As String) As Boolean
+    Dim i As Long
+    For i = LBound(Values) To UBound(Values)
+        ContainsOneOf = InStr(1, s, Values(i)) > 0
+        If ContainsOneOf Then Exit Function
+    Next
 End Function
 
 Public Function EndsWith(s As String, ByVal Value As String) As Boolean
@@ -668,6 +901,26 @@ Public Function Substring(s As String, Optional ByVal startIndex As Long, Option
     Substring = Mid(s, startIndex, Length)
 End Function
 
+Public Function Between(Line As String, ByVal s1 As String, ByVal s2 As String) As String
+    'returns the string inside Line in between s1 and s2
+    Dim pos1 As Long, pos2 As Long
+    If Len(s1) Then
+        pos1 = InStr(1, Line, s1)
+        If pos1 <= 0 Then Exit Function
+        pos1 = pos1 + Len(s1)
+    Else
+        pos1 = 1
+    End If
+    If Len(s2) Then
+        pos2 = InStr(pos1, Line, s2)
+        If pos2 <= 0 Then Exit Function
+        pos2 = pos2 - 1 'Len(s)
+    Else
+        pos2 = Len(Line)
+    End If
+    Between = Mid(Line, pos1, pos2 - pos1 + 1)
+End Function
+
 Public Function ToCharArray(s As String, ByVal startIndex As Long, ByVal Length As Long) As Integer()
     ReDim CharArray(0 To Length - 1) As Integer
     lstrcpyW VarPtr(CharArray(0)), StrPtr(Mid$(s, startIndex, Length))
@@ -863,38 +1116,38 @@ Public Function GetTabbedText(s As String, Optional onlyNewLine As Boolean = Fal
     Dim svbCrLf As String: If onlyNewLine Then svbCrLf = vbCrLf
     'jeden Wert in eine neue Zeile
     For i = LBound(lines) To UBound(lines)
-        Dim line As String
+        Dim Line As String
         'alle mehrfachen Whitespaces enfernen
-        line = DeleteMultiWS(lines(i))
+        Line = DeleteMultiWS(lines(i))
         'für Excel: alle Zahlen mit Komma(",") statt Punkt(".")
-        line = Replace(line, ".", ",")
-        If Left(line, 3) = "K45" Then
+        Line = Replace(Line, ".", ",")
+        If Left(Line, 3) = "K45" Then
             Debug.Assert True
         End If
         If NumOnly Then
-            Dim sa() As String: sa = Split(line, " ")
+            Dim sa() As String: sa = Split(Line, " ")
             Dim j As Long, u As Long: u = UBound(sa)
-            line = ""
+            Line = ""
             For j = 0 To u
                 If IsNumeric(sa(j)) Then
-                    line = line & sa(j) & svbCrLf
+                    Line = Line & sa(j) & svbCrLf
                     If onlyNewLine Then
                         'line = line & vbNewLine
                     Else
                         If j < u Then
-                            line = line & vbTab '" "
+                            Line = Line & vbTab '" "
                         End If
                     End If
                 End If
             Next
         Else
             If onlyNewLine Then
-                line = Replace(line, " ", vbCrLf)
+                Line = Replace(Line, " ", vbCrLf)
             Else
-                line = Replace(line, " ", vbTab)
+                Line = Replace(Line, " ", vbTab)
             End If
         End If
-        lines(i) = line
+        lines(i) = Line
     Next
     GetTabbedText = Join(lines, vbCrLf)
 End Function

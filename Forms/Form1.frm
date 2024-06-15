@@ -19,6 +19,14 @@ Begin VB.Form Form1
    ScaleHeight     =   7695
    ScaleWidth      =   15375
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton BtnTestTryParse 
+      Caption         =   "TestTryParse"
+      Height          =   375
+      Left            =   5280
+      TabIndex        =   33
+      Top             =   480
+      Width           =   2415
+   End
    Begin VB.CommandButton BtnPadCentered 
       Caption         =   "PadCentered"
       Height          =   375
@@ -36,7 +44,6 @@ Begin VB.Form Form1
       Width           =   1335
    End
    Begin VB.TextBox Text8 
-      Alignment       =   2  'Zentriert
       BeginProperty Font 
          Name            =   "Consolas"
          Size            =   9.75
@@ -63,9 +70,9 @@ Begin VB.Form Form1
       Width           =   1215
    End
    Begin VB.CommandButton BtnTestByteOrderMark 
-      Caption         =   "Test ByteOrderMark >>"
+      Caption         =   "Test ByteOrderMark"
       Height          =   375
-      Left            =   10920
+      Left            =   2760
       TabIndex        =   28
       Top             =   480
       Width           =   2415
@@ -114,7 +121,6 @@ Begin VB.Form Form1
       Width           =   1335
    End
    Begin VB.TextBox Text7 
-      Alignment       =   2  'Zentriert
       BeginProperty Font 
          Name            =   "Consolas"
          Size            =   9.75
@@ -141,7 +147,7 @@ Begin VB.Form Form1
       Width           =   1335
    End
    Begin VB.TextBox Text6 
-      Alignment       =   2  'Zentriert
+      Alignment       =   1  'Rechts
       BeginProperty Font 
          Name            =   "Consolas"
          Size            =   9.75
@@ -176,7 +182,6 @@ Begin VB.Form Form1
       Width           =   1335
    End
    Begin VB.TextBox Text5 
-      Alignment       =   2  'Zentriert
       BeginProperty Font 
          Name            =   "Consolas"
          Size            =   9.75
@@ -388,11 +393,45 @@ Private Sub BtnTestByteOrderMark_Click()
     Form2.Show
 End Sub
 
+Private Sub BtnTestTryParse_Click()
+    Dim b As Byte, i As Integer, l As Long, bo As Boolean, si As Single, d As Double, da As String, cu As Currency, de As Variant, st As String, arr, v, vt As VbVarType
+    Dim s As String, sl As String
+    s = "123":            If Byte_TryParse(s, b) Then sl = sl & "Datatype of " & s & " is Byte = " & b & vbCrLf
+    s = "12345":          If Integer_TryParse(s, i) Then sl = sl & "Datatype of " & s & " is Integer = " & i & vbCrLf
+    s = "1234567":        If Long_TryParse(s, l) Then sl = sl & "Datatype of " & s & " is Long = " & l & vbCrLf
+    s = "1234.567":       If Single_TryParse(s, si) Then sl = sl & "Datatype of " & s & " is Single = " & si & vbCrLf
+    s = "1234567.89012":  If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    s = CStr(True):       If Boolean_TryParse(s, bo) Then sl = sl & "Datatype of " & s & " is Boolean = " & bo & vbCrLf
+    s = Format(Now):      If Date_TryParse(s, da) Then sl = sl & "Datatype of " & s & " is Date = " & da & vbCrLf
+    s = "123456789,1234": If Currency_TryParse(s, cu) Then sl = sl & "Datatype of " & s & " is Currency = " & cu & vbCrLf
+    s = "123456789012344567890": If Decimal_TryParse(s, de) Then sl = sl & "Datatype of " & s & " is Decimal = " & de & vbCrLf
+    s = """This is a string""":  If String_TryParse(s, st) Then sl = sl & "Datatype of " & s & " is String = " & st & vbCrLf
+    s = "Eins" & vbTab & "Zwei" & vbTab & "Drei": If Array_TryParse(s, arr) Then sl = sl & "Datatype of " & s & " is Array = (" & arr(0) & "; " & arr(1) & "; " & arr(2) & ")" & vbCrLf
+    
+    s = "123%": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt)
+                If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+        
+    s = "123&": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt)
+                If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+    
+    s = "123.456!": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt) '& " = " & s & vbCrLf
+                If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+    
+    s = "123.456#": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt) '& " = " & s & vbCrLf
+                If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+    
+    s = "123.456@": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt) '& " = " & s & vbCrLf
+                If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+    
+    
+    Text2.Text = sl
+End Sub
+
 Private Sub Command1_Click()
     Dim s As String: s = "Dies ist ein Teststring"
-    Dim chars() As Integer
-    chars = MString.ToCharArray(s, 14, 5)
-    MsgBox ChrW(chars(0)) & " " & ChrW(chars(1)) & " " & ChrW(chars(2)) & " " & ChrW(chars(3)) & " " & ChrW(chars(4))
+    Dim Chars() As Integer
+    Chars = MString.ToCharArray(s, 14, 5)
+    MsgBox ChrW(Chars(0)) & " " & ChrW(Chars(1)) & " " & ChrW(Chars(2)) & " " & ChrW(Chars(3)) & " " & ChrW(Chars(4))
     If MString.StartsWith(s, "Dies") Then MsgBox "Yes, String s starts with ""Dies"""
 End Sub
 
@@ -422,6 +461,7 @@ Private Sub Form_Load()
     BtnResetPadLeft_Click
     BtnResetPadRight_Click
     BtnResetPadLeftRight_Click
+    BtnResetPadCentered_Click
 End Sub
 
 Private Sub Form_Resize()
@@ -520,6 +560,7 @@ Private Sub BtnResetPadLeft_Click()
         Value = Int(Rnd() * 10& ^ (Rnd * 10&))
         sa(i) = CStr(Value)
     Next
+    Text5.Alignment = AlignmentConstants.vbLeftJustify
     Text5.Text = Join(sa, vbCrLf)
 End Sub
 
@@ -532,6 +573,7 @@ Private Sub BtnPadLeft_Click()
     For i = 0 To UBound(sa)
         sa(i) = MString.PadLeft(sa(i), maxlen)
     Next
+    Text5.Alignment = AlignmentConstants.vbCenter
     Text5.Text = Join(sa, vbCrLf)
 End Sub
 
@@ -545,6 +587,7 @@ Private Sub BtnResetPadRight_Click()
         Value = CLng(Rnd() * 10) / (10& ^ (Rnd() * 10)) 'i&)
         sa(i) = Format(Value, "0." & String(Rnd * 10, "#"))
     Next
+    Text6.Alignment = AlignmentConstants.vbLeftJustify
     Text6.Text = Join(sa, vbCrLf)
 End Sub
 
@@ -557,6 +600,7 @@ Private Sub BtnPadRight_Click()
     For i = 0 To UBound(sa)
         sa(i) = MString.PadRight(sa(i), maxlen)
     Next
+    Text6.Alignment = AlignmentConstants.vbCenter
     Text6.Text = Join(sa, vbCrLf)
 End Sub
 
@@ -572,6 +616,7 @@ Private Sub BtnResetPadLeftRight_Click()
         Value2 = CLng(Rnd() * 10) / (10& ^ (Rnd() * 10))
         sa(i) = CStr(Value1) & Format(Value2, "." & String(Rnd * 10, "#"))
     Next
+    Text7.Alignment = AlignmentConstants.vbLeftJustify
     Text7.Text = Join(sa, vbCrLf)
 End Sub
 
@@ -588,23 +633,37 @@ Private Sub BtnPadLeftRight_Click()
         sx = Split(sa(i), ds)
         sa(i) = MString.PadLeft(sx(0), maxlen1) & ds & MString.PadRight(sx(1), maxlen2)
     Next
+    Text7.Alignment = AlignmentConstants.vbCenter
     Text7.Text = Join(sa, vbCrLf)
 End Sub
 
-''' v ############################## v ''' Test 7 ''' v ############################## v '''
+''' v ############################## v ''' Test 8 ''' v ############################## v '''
 Private Sub BtnResetPadCentered_Click()
     Randomize
+    Dim Value As Currency
     ReDim sa(0 To 9) As String
     Dim i As Long
     For i = 0 To UBound(sa)
-        'Value1 = Int(Rnd() * 10& ^ (Rnd * 10&))
-        'Value2 = CLng(Rnd() * 10) / (10& ^ (Rnd() * 10))
-        sa(i) = CStr(Value1) & Format(Value2, "." & String(Rnd * 10, "#"))
+        Value = Int(Rnd() * 10& ^ (Rnd * 10&))
+        sa(i) = CStr(Value)
     Next
+    Text8.Alignment = AlignmentConstants.vbLeftJustify
     Text8.Text = Join(sa, vbCrLf)
 End Sub
 
 Private Sub BtnPadCentered_Click()
-    '
+    Dim sa() As String: sa = Split(Text8.Text, vbCrLf)
+    Dim ds As String: ds = GetDecimalSeparator
+    Dim i As Long, maxlen As Long ', maxlen2 As Long
+    For i = 0 To UBound(sa)
+        'Dim sx() As String: sx = Split(sa(i), ds)
+        maxlen = Max(maxlen, Len(sa(i)))
+        'maxlen2 = Max(maxlen2, Len(sx(1)))
+    Next
+    For i = 0 To UBound(sa)
+        'sx = Split(sa(i), ds)
+        sa(i) = MString.PadCentered(sa(i), maxlen) '& ds & MString.PadRight(sx(1), maxlen2)
+    Next
+    Text8.Alignment = AlignmentConstants.vbCenter
+    Text8.Text = Join(sa, vbCrLf)
 End Sub
-

@@ -94,7 +94,10 @@ Option Explicit
 Private Sub Command1_Click()
     Dim FNm As String:  FNm = App.Path & "\StringAnsiWindows1252.txt"
     Dim s As String: s = FileReadAllString(FNm)
-'    Dim bom As EByteOrderMark: bom = IsBOM(s, s)
+    Dim bom As EByteOrderMark: bom = IsBOM(s, s)
+    If bom = bom_None Then
+        s = StrConv(s, vbUnicode)
+    End If
 '    If bom = bom_UTF_8 Then
 '        Dim buffer() As Byte: buffer = s
 '        s = MString.ConvertFromUTF8(buffer)
@@ -105,11 +108,11 @@ End Sub
 Private Sub Command2_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF8.txt"
     Dim s As String: s = FileReadAllString(FNm)
-'    Dim bom As EByteOrderMark: bom = IsBOM(s, s)
-'    If bom = bom_UTF_8 Then
-'        Dim buffer() As Byte: buffer = s
-'        s = MString.ConvertFromUTF8(buffer)
-'    End If
+    Dim bom As EByteOrderMark: bom = IsBOM(s, s)
+    If bom = bom_UTF_8 Then
+        Dim buffer() As Byte: buffer = s
+        s = MString.ConvertFromUTF8(buffer)
+    End If
     Text2.Text = s
 End Sub
 
@@ -134,34 +137,37 @@ Function FileReadAllString(FNm As String) As String
 Try: On Error GoTo Catch
     Dim FNr As Integer: FNr = FreeFile
     Open FNm For Binary As FNr
-    Dim bom As EByteOrderMark 'Long
-    Get FNr, , bom
+    'Dim bom As EByteOrderMark 'Long
+    'Dim ibom As Integer
+    'Get FNr, , ibom
+    'bom = ibom
     Dim u As Long: u = LOF(FNr) - 1
     'If bom <> bom_None Then u = u - MString.E
-    ReDim FileContent(0 To u) As Byte
-    Get FNr, , FileContent
+    ReDim filecontent(0 To u) As Byte
+    Get FNr, , filecontent
     Dim s As String
     
-    Select Case bom
-    Case EByteOrderMark.bom_UTF_16_BE
-        'swap the order around
-        s = FileContent
-        MPtr.String_Rotate2 s
-    Case EByteOrderMark.bom_UTF_16_LE
-        'do nothing, string is perfekt as it should be
-    Case EByteOrderMark.bom_UTF_32_BE
-        s = StrConv(FileContent, vbFromUnicode)
-        MPtr.String_Rotate2 s
-    Case EByteOrderMark.bom_UTF_32_LE
-        s = StrConv(FileContent, vbFromUnicode)
-    Case EByteOrderMark.bom_UTF_7
-        
-    Case EByteOrderMark.bom_UTF_8
-        s = MString.ConvertFromUTF8(FileContent)
-    Case EByteOrderMark.bom_UTF_EBCDIC
+    'Select Case bom
+    'Case EByteOrderMark.bom_UTF_16_BE
+    '    'swap the order around
+    '    s = filecontent
+    '    MPtr.String_Rotate2 s
+    'Case EByteOrderMark.bom_UTF_16_LE
+    '    'do nothing, string is perfekt as it should be
+    'Case EByteOrderMark.bom_UTF_32_BE
+    '    s = StrConv(filecontent, vbFromUnicode)
+    '    MPtr.String_Rotate2 s
+    'Case EByteOrderMark.bom_UTF_32_LE
+    '    s = StrConv(filecontent, vbFromUnicode)
+    'Case EByteOrderMark.bom_UTF_7
+    '
+    'Case EByteOrderMark.bom_UTF_8
+    '    s = MString.ConvertFromUTF8(filecontent)
+    'Case EByteOrderMark.bom_UTF_EBCDIC
         'sorry no solution yet!
-        
-    End Select
+    'Case Else
+        s = filecontent
+    'End Select
     FileReadAllString = s
     GoTo Finally
 Catch:
