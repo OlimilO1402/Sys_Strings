@@ -394,7 +394,7 @@ Private Sub BtnTestByteOrderMark_Click()
 End Sub
 
 Private Sub BtnTestTryParse_Click()
-    Dim b As Byte, i As Integer, l As Long, bo As Boolean, si As Single, d As Double, da As String, cu As Currency, de As Variant, st As String, arr, v, vt As VbVarType
+    Dim b As Byte, i As Integer, l As Long, bo As Boolean, si As Single, d As Double, da As Date, cu As Currency, de As Variant, st As String, Arr, v, vt As VbVarType
     Dim s As String, sl As String
     s = "123":            If Byte_TryParse(s, b) Then sl = sl & "Datatype of " & s & " is Byte = " & b & vbCrLf
     s = "12345":          If Integer_TryParse(s, i) Then sl = sl & "Datatype of " & s & " is Integer = " & i & vbCrLf
@@ -406,23 +406,64 @@ Private Sub BtnTestTryParse_Click()
     s = "123456789,1234": If Currency_TryParse(s, cu) Then sl = sl & "Datatype of " & s & " is Currency = " & cu & vbCrLf
     s = "123456789012344567890": If Decimal_TryParse(s, de) Then sl = sl & "Datatype of " & s & " is Decimal = " & de & vbCrLf
     s = """This is a string""":  If String_TryParse(s, st) Then sl = sl & "Datatype of " & s & " is String = " & st & vbCrLf
-    s = "Eins" & vbTab & "Zwei" & vbTab & "Drei": If Array_TryParse(s, arr) Then sl = sl & "Datatype of " & s & " is Array = (" & arr(0) & "; " & arr(1) & "; " & arr(2) & ")" & vbCrLf
+    s = "Eins" & vbTab & "Zwei" & vbTab & "Drei": If Array_TryParse(s, Arr) Then sl = sl & "Datatype of " & s & " is Array = (" & Arr(0) & "; " & Arr(1) & "; " & Arr(2) & ")" & vbCrLf
     
-    s = "123%": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt)
+    s = "123%": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VBVarType_ToStr(vt)
                 If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
         
-    s = "123&": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt)
+    s = "123&": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VBVarType_ToStr(vt)
                 If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
     
-    s = "123.456!": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt) '& " = " & s & vbCrLf
-                If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+    s = "123.456!": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VBVarType_ToStr(vt) '& " = " & s & vbCrLf
+                    If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
     
-    s = "123.456#": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt) '& " = " & s & vbCrLf
-                If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+    s = "123.456#": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VBVarType_ToStr(vt) '& " = " & s & vbCrLf
+                    If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
     
-    s = "123.456@": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VbVarType_ToStr(vt) '& " = " & s & vbCrLf
-                If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+    s = "123.456@": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VBVarType_ToStr(vt) '& " = " & s & vbCrLf
+                    If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+        
+    s = "&HABCDEF12&": If Numeric_TryParse(s, vt, v) Then sl = sl & "Datatype of " & s & " is " & VBVarType_ToStr(vt)
+                       If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
+    i = 0
+    s = "&B101": If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
     
+    s = "&B11111111": If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
+    
+    s = "&B1111111111111111": If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
+    
+    s = "&B1111111111111110": If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
+    
+    s = "&B1111111111111101": If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
+    
+    i = Rnd * 32767
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
+    i = 0: If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    
+    i = -Rnd * 32767
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
+    i = 0: If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    
+    i = Rnd * 255
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
+    i = 0: If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    
+    i = -Rnd * 255
+    s = BinInt_ToStr(i): sl = sl & "BinInt_ToStr(" & i & ") = " & s & vbCrLf
+    i = 0: If BinInt_TryParse(s, i) Then sl = sl & "BinInt_TryParse(" & s & ") = " & i & vbCrLf
+    
+    l = Rnd * 2147483647
+    s = BinLng_ToStr(l): sl = sl & "BinLng_ToStr(" & l & ") = " & s & vbCrLf
+    l = 0: If BinLng_TryParse(s, l) Then sl = sl & "BinLng_TryParse(" & s & ") = " & l & vbCrLf
+    
+    l = -Rnd * 2147483647
+    s = BinLng_ToStr(l): sl = sl & "BinLng_ToStr(" & l & ") = " & s & vbCrLf
+    l = 0: If BinLng_TryParse(s, l) Then sl = sl & "BinLng_TryParse(" & s & ") = " & l & vbCrLf
     
     Text2.Text = sl
 End Sub

@@ -67,7 +67,14 @@ End Type
 #If False Then
     Value
 #End If
+'Extension to vbvartype
+Private Const vbHex As Long = &H10000
+Private Const vbOct As Long = &H20000
+Private Const vbBin As Long = &H40000
+
 Public DecimalSeparator As String
+Public CurrencySymbol   As String
+
 
 'VB does automatic in and out Ansi/Unicode conversion when calling winapi-functions with parameters of type String
 'you can simulate this behaviour by using StrPtrWA in the call and WACorr afterwards
@@ -151,19 +158,30 @@ Public Function IsOct(s As String) As Boolean
         Case Else: Exit Function
         End Select
     Next
-    IsHex = True
+    IsOct = True
 End Function
 
 Public Function IsBin(s As String) As Boolean
     Dim i As Long
     For i = 1 To Len(s)
-        Select Case Asc(Mid(s, i, 1))
-        Case 48:
-        Case 49:  ' 0 oder 1 OK weiter
+        Select Case AscW(Mid(s, i, 1))
+        Case 48, 49: ' 0 oder 1 OK weiter
         Case Else: Exit Function
         End Select
     Next
-    IsHex = True
+    IsBin = True
+End Function
+
+Public Function IsHexPrefix(ByVal s As String) As Boolean
+    IsHexPrefix = Left(Trim(s), 2) = "&H"
+End Function
+
+Public Function IsOctPrefix(ByVal s As String) As Boolean
+    IsOctPrefix = Left(Trim(s), 2) = "&O"
+End Function
+
+Public Function IsBinPrefix(ByVal s As String) As Boolean
+    IsBinPrefix = Left(Trim(s), 2) = "&B"
 End Function
 
 'Dim fnam As String: fnam = Left(lpElfe.lfFontName, lstrlenW(lpElfe.lfFontName(0)))
@@ -324,19 +342,6 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
-Public Function IntHex_TryParse(ByVal Value As String, ByRef Value_out As Integer) As Boolean
-Try: On Error GoTo Catch
-    Value = Trim(Value)
-    If Not IsHex(Value) Then Exit Function
-    Dim vt As VbVarType
-    If VBTypeIdentifier_TryParse(Value, vt) Then
-        If vt <> vbInteger Then Exit Function
-    End If
-    Value_out = CInt(Value)
-    IntHex_TryParse = True
-Catch:
-End Function
-
 Public Function Long_TryParse(ByVal Value As String, ByRef Value_out As Long) As Boolean
 Try: On Error GoTo Catch
     Value = Trim(Value)
@@ -379,7 +384,7 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
-Public Function Date_TryParse(ByVal Value As String, Value_out) As Boolean
+Public Function Date_TryParse(ByVal Value As String, ByRef Value_out As Date) As Boolean
 Try: On Error GoTo Catch
     Value_out = CDate(Value)
     Date_TryParse = True
@@ -419,6 +424,27 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
+Public Function Identifier_TryParse(ByVal s As String, Value_out As String) As Boolean
+Try: On Error GoTo Catch
+    s = Trim(s)
+    If Left(s, 1) = """" Then Exit Function
+    If Right(s, 1) = """" Then Exit Function
+    Dim i As Long: i = 1
+    Select Case AscW(Mid(s, i, 1))
+    Case 65 To 90, 95, 97 To 122 '"A" - "Z", "_", "a" - "z"
+    Case Else: Exit Function
+    End Select
+    For i = 2 To Len(s)
+        Select Case AscW(Mid(s, i, 1))
+        Case 48 To 57, 65 To 90, 95, 97 To 122 '"A" - "Z", "_", "a" - "z"
+        Case Else: Exit Function
+        End Select
+    Next
+    Value_out = s
+    Identifier_TryParse = True
+Catch:
+End Function
+
 Public Function Array_TryParse(ByVal s As String, Value_out, Optional ByVal Delimiter = vbTab) As Boolean
 Try: On Error GoTo Catch
     Value_out = Split(s, Delimiter)
@@ -441,7 +467,239 @@ Public Function Array_ToStr(Arr) As String
     Array_ToStr = s & ")"
 End Function
 
+'
+'there can either be
+'&H8000  which is Integer = -32768
+'or
+'&H8000& which is Long    =  32768
+'
+'there can either be
+'&HFFFF  which is Integer = -1
+'or
+'&HFFFF& which is Long    =  65535
+'
+'Private Const iiii  As Long    = &H8000&
+'Private Const iiii2 As Integer = &H1234
+
+'Public Function TestHexTryParse(ByVal s As String) As Boolean
+'    Dim vt As VbVarType, v
+'    If Hex_TryParse(s, vt, v) Then
+'        Debug.Print s & " as " & VBVarType_ToStr(vt) & " = " & v
+'        TestHexTryParse = True
+'    End If
+'End Function
+
+Public Function HexInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    If IsHexPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim vt As VbVarType
+    If VBTypeIdentifier_TryParse(s, vt) Then
+        s = Left(s, l - 1)
+        If vt <> VbVarType.vbInteger Then Exit Function
+    End If
+    If Not IsHex(s) Then Exit Function
+    Value_out = CInt(s)
+    HexInt_TryParse = True
+Catch:
+End Function
+
+Public Function HexLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    If IsHexPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim vt As VbVarType
+    If VBTypeIdentifier_TryParse(s, vt) Then
+        s = Left(s, l - 1)
+        If vt <> VbVarType.vbLong Then Exit Function
+    End If
+    If Not IsHex(s) Then Exit Function
+    Value_out = CLng(s)
+    HexLng_TryParse = True
+Catch:
+End Function
+
+Public Function Hex_TryParse(ByVal s As String, vtid_out As VbVarType, ByRef Value_out) As Boolean
+    'string must be like
+    '&H0, &H12, &HABCDEF12, &H12&,
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    '&HABCDEF12&
+    '12345678901
+    '
+    If l < 3 Or 11 < l Then Exit Function
+    If Not IsHexPrefix(s) Then Exit Function
+    'there is either % for integer, or & for long or none
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If Not IsHex(Mid(s, 3)) Then Exit Function
+    Dim i As Integer, lng As Long
+    If vtid_out = VbVarType.vbEmpty Then
+        If l < 6 Then
+            Value_out = CInt(s)
+        Else
+            Value_out = CLng(s)
+        End If
+    ElseIf vtid_out = VbVarType.vbLong Then
+        Value_out = CLng(s)
+    End If
+    Hex_TryParse = True
+Catch:
+End Function
+
+Public Function OctInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    If IsOctPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim vt As VbVarType
+    If VBTypeIdentifier_TryParse(s, vt) Then
+        s = Left(s, l - 1)
+        If vt <> VbVarType.vbInteger Then Exit Function
+    End If
+    If Not IsOct(s) Then Exit Function
+    Value_out = CInt(s)
+    OctInt_TryParse = True
+Catch:
+End Function
+
+Public Function OctLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    If IsOctPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim vt As VbVarType
+    If VBTypeIdentifier_TryParse(s, vt) Then
+        s = Left(s, l - 1)
+        If vt <> VbVarType.vbLong Then Exit Function
+    End If
+    If Not IsOct(s) Then Exit Function
+    Value_out = CLng(s)
+    OctLng_TryParse = True
+Catch:
+End Function
+
+Public Function Oct_TryParse(ByVal s As String, vtid_out As VbVarType, Value_out) As Boolean
+    'string must be like
+    '&H0, &H12, &H12345670, &H12&,
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    '&H12345678&
+    '12345678901
+    '
+    If l < 3 Or 11 < l Then Exit Function
+    If Not IsOctPrefix(s) Then Exit Function
+    'there is either % for integer, or & for long or none
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If Not IsOct(Mid(s, 3)) Then Exit Function
+    Dim i As Integer, lng As Long
+    If vtid_out = VbVarType.vbEmpty Then
+        If l < 6 Then
+            Value_out = CInt(s)
+        Else
+            Value_out = CLng(s)
+        End If
+    ElseIf vtid_out = VbVarType.vbLong Then
+        Value_out = CLng(s)
+    End If
+    Oct_TryParse = True
+Catch:
+End Function
+
+Public Function BinInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    If IsBinPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim vt As VbVarType
+    If VBTypeIdentifier_TryParse(s, vt) Then
+        s = Left(s, l - 1): l = Len(s)
+        If vt <> VbVarType.vbInteger Then Exit Function
+    End If
+    If Not IsBin(s) Then Exit Function
+    If 16 < l Then Exit Function
+    Dim i As Long, n As Long: n = Min(l, 15)
+    Dim v As Integer
+    For i = 0 To n - 1
+        If Mid(s, l - i, 1) = "1" Then v = v + 2 ^ i
+    Next
+    If l = 16 Then
+        If Mid(s, l - i, 1) = "1" Then v = v Xor &H8000
+    End If
+    Value_out = v
+    BinInt_TryParse = True
+Catch:
+End Function
+
+Public Function BinInt_ToStr(ByVal Value As Integer) As String
+    'with or without starting 0 ?
+    'here first with starting 0
+    Dim s As String
+    Dim i As Long, v As Integer
+    For i = 0 To 14
+        v = 2 ^ i
+        If Value And v Then
+            s = "1" & s
+        Else
+            s = "0" & s
+        End If
+    Next
+    If Value < 0 Then s = "1" & s Else s = "0" & s
+    BinInt_ToStr = s
+End Function
+
+Public Function BinLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    If IsBinPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim vt As VbVarType
+    If VBTypeIdentifier_TryParse(s, vt) Then
+        s = Left(s, l - 1): l = Len(s)
+        If vt <> VbVarType.vbLong Then Exit Function
+    End If
+    If Not IsBin(s) Then Exit Function
+    If 32 < l Then Exit Function
+    Dim i As Long, n As Long: n = Min(l, 31)
+    Dim v As Long
+    For i = 0 To n - 1
+        If Mid(s, l - i, 1) = "1" Then v = v + 2 ^ i
+    Next
+    If l = 32 Then
+        If Mid(s, l - i, 1) = "1" Then v = v Xor &H80000000
+    End If
+    Value_out = v
+    BinLng_TryParse = True
+Catch:
+End Function
+
+Public Function BinLng_ToStr(ByVal Value As Long) As String
+    'with or without starting 0 ?
+    'here first with starting 0
+    Dim s As String
+    Dim i As Long, v As Long
+    For i = 0 To 30
+        v = 2 ^ i
+        If Value And v Then
+            s = "1" & s
+        Else
+            s = "0" & s
+        End If
+    Next
+    If Value < 0 Then s = "1" & s Else s = "0" & s
+    BinLng_ToStr = s
+End Function
+
 Public Function CheckType(ByVal s As String, ByVal vt As VbVarType, Value_out) As Boolean
+    
+    If vt And vbHex Then vt = vt Xor vbHex
+    
+    If vt And vbOct Then vt = vt Xor vbOct
+    If vt And vbBin Then vt = vt Xor vbBin
+
     Select Case vt
     Case VbVarType.vbByte:        Dim BytVal As Byte:     CheckType = Byte_TryParse(s, BytVal):      Value_out = BytVal
     Case VbVarType.vbInteger:     Dim IntVal As Integer:  CheckType = Integer_TryParse(s, IntVal):   Value_out = IntVal
@@ -483,22 +741,69 @@ Public Function VBVarType_TryParse(ByVal s As String, vt_out As VbVarType) As Bo
 End Function
 
 Public Function VBVarType_ToStr(ByVal vt As VbVarType) As String
+    
     Dim s As String
+    
+    If vt And vbHex Then
+        s = " (Hex)"
+        vt = vt Xor vbHex
+    End If
+    
+    If vt And vbOct Then
+        s = " (Oct)"
+        vt = vt Xor vbOct
+    End If
+    
+    If vt And vbBin Then
+        s = " (Bin)"
+        vt = vt Xor vbBin
+    End If
+    
     Select Case vt
-    Case VbVarType.vbByte:     s = "Byte"
-    Case VbVarType.vbInteger:  s = "Integer"
-    Case VbVarType.vbLong:     s = "Long"
-    Case VbVarType.vbCurrency: s = "Currency"
-    Case VbVarType.vbSingle:   s = "Single"
-    Case VbVarType.vbDouble:   s = "Double"
-    Case VbVarType.vbDate:     s = "Date"
-    Case VbVarType.vbDecimal:  s = "Decimal"
-    Case VbVarType.vbString:   s = "String"
-    Case VbVarType.vbObject:   s = "Object"
-    Case VbVarType.vbVariant:  s = "Variant"
+    Case VbVarType.vbEmpty:           s = "None/Empty" & s ' =  0
+    Case VbVarType.vbNull:            s = "Null" & s        ' =  1
+    Case VbVarType.vbInteger:         s = "Integer" & s     ' =  2
+    Case VbVarType.vbLong:            s = "Long" & s        ' =  3
+    Case VbVarType.vbSingle:          s = "Single" & s      ' =  4
+    Case VbVarType.vbDouble:          s = "Double" & s      ' =  5
+    Case VbVarType.vbCurrency:        s = "Currency" & s    ' =  6
+    Case VbVarType.vbDate:            s = "Date" & s        ' =  7
+    Case VbVarType.vbString:          s = "String" & s      ' =  8
+    Case VbVarType.vbObject:          s = "Object" & s      ' =  9
+    Case VbVarType.vbError:           s = "Error" & s       ' = 10
+    Case VbVarType.vbBoolean:         s = "Boolean" & s     ' = 11
+    Case VbVarType.vbVariant:         s = "Variant" & s     ' = 12
+    Case VbVarType.vbDataObject:      s = "DataObject" & s  ' = 13
+    Case VbVarType.vbDecimal:         s = "Decimal" & s     ' = 14
+    Case VbVarType.vbByte:            s = "Byte" & s       ' = 17 (&H11)
+    Case VbVarType.vbUserDefinedType: s = "UserDefinedType" & s ' = 36 (&H24)
+    Case VbVarType.vbArray:           s = "Array" & s      ' = 8192 (&H2000)
+    
     End Select
     VBVarType_ToStr = s
 End Function
+
+'vbEmpty           =  0
+'vbNull            =  1
+'vbInteger         =  2
+'vbLong            =  3
+'vbSingle          =  4
+'vbDouble          =  5
+'vbCurrency        =  6
+'vbDate            =  7
+'vbString          =  8
+'vbObject          =  9
+'vbError           = 10
+'vbBoolean         = 11
+'vbVariant         = 12
+'vbDataObject      = 13
+'vbDecimal         = 14
+'vbByte            = 17 (&H11)
+'vbUserDefinedType = 36 (&H24)
+'vbArray           = 8192 (&H2000)
+'vbHex             = &H10000
+'vbOct             = &H20000
+'vbBin             = &H40000
 
 'https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/data-type-summary
 Public Function VBTypeIdentifier_TryParse(s As String, vt_out As VbVarType) As Boolean
@@ -531,13 +836,101 @@ Public Function VBTypeIdentifier_TryParse(s As String, vt_out As VbVarType) As B
     VBTypeIdentifier_TryParse = b
 End Function
 
-Public Function Numeric_TryParse(ByVal s As String, v_out As Variant) As Boolean
-    If IsHex(s) Then
+Public Function Numeric_TryParse(ByVal s As String, vtid_out As Long, Value_out As Variant) As Boolean
+Try: On Error GoTo Catch
     
+    s = Trim(s)
+    
+    Numeric_TryParse = Hex_TryParse(s, vtid_out, Value_out)
+    If Numeric_TryParse Then vtid_out = vtid_out Or vbHex: Exit Function
+    
+    Numeric_TryParse = Oct_TryParse(s, vtid_out, Value_out)
+    If Numeric_TryParse Then vtid_out = vtid_out Or vbOct: Exit Function
+    
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then
+        s = Left(s, Len(s) - 1)
+    End If
+    
+    Dim byt As Byte
+    Numeric_TryParse = Byte_TryParse(s, byt)
+    If Numeric_TryParse Then Value_out = byt: Exit Function
+    
+    Dim iii As Integer
+    Numeric_TryParse = Integer_TryParse(s, iii)
+    If Numeric_TryParse Then Value_out = iii: Exit Function
+    
+    Dim lng As Long
+    Numeric_TryParse = Long_TryParse(s, lng)
+    If Numeric_TryParse Then Value_out = lng: Exit Function
+    
+    Dim sng As Single
+    Numeric_TryParse = Single_TryParse(s, sng)
+    If Numeric_TryParse Then Value_out = sng: Exit Function
+    
+    Dim dbl As Double
+    Numeric_TryParse = Double_TryParse(s, dbl)
+    If Numeric_TryParse Then Value_out = dbl: Exit Function
+    
+    Dim cur As Currency
+    Numeric_TryParse = Currency_TryParse(s, cur)
+    If Numeric_TryParse Then Value_out = cur: Exit Function
+    
+    Dim dec 'As Long
+    Numeric_TryParse = Decimal_TryParse(s, cur)
+    If Numeric_TryParse Then Value_out = dec: Exit Function
+    
+    
+    
+Catch:
+
+'    Dim l As Long: l = Len(s)
+'    If l = 0 Then Exit Function
+'    'returns true if s contains a numeric value
+'    'this could be: Byte, Integer, Long, Single, Double, Currency, Decimal
+'    'for int-types this could be Hex, Oct, Bin or Decimal
+'    'for flt-types this could be Single, Double, Currency oder Decimal
+'    's could have a typeidentifier-character at the end
+'    'then we must check whether the typeidentifier matches the type of the value
+'    'in vtid_out we return the type-identifier and additional bits for hex, oct, bin
+'    'hex =
+'    Dim vtid As VbVarType
+'    If VBTypeIdentifier_TryParse(s, vtid) Then
+'        s = Left(s, Len(s) - 1)
+'        l = l - 1
+'        If l = 0 Then Exit Function
+'    End If
+'    Dim bHex As Boolean: bHex = IsHexPrefix(s): If bHex Then vtid = vtid Or &H10000
+'    Dim bOct As Boolean: bOct = IsOctPrefix(s): If bOct Then vtid = vtid Or &H20000
+'    Dim bBin As Boolean: bBin = IsBinPrefix(s): If bBin Then vtid = vtid Or &H40000
+'    If bHex Or bOct Or bBin Then s = Mid(s, 3)
+'    Dim lng As Long
+'    If bHex And IsHex(s) Then
+'        l = Len(s)
+'        lng = CLng("&H" & s)
+'        Select Case True
+'        Case Is <= 2: If vtid = VbVarType.vbEmpty Then Numeric_TryParse = True
+'                Value_out = CByte(lng)
+'        Case Is <= 4: If vtid = VbVarType.vbInteger Then Numeric_TryParse = True
+'                Value_out = CInt(lng)
+'        Case Is <= 8: If vtid = VbVarType.vbLong Then Numeric_TryParse = True
+'                Value_out = lng
+'        Case Else
+'        End Select
+'
+'        Exit Function
+'    End If
+'
+'
+'        s = Mid(s, 3, Len(s) - 3)
+'        If IsHex(s) Then
+'            'v_out =
+'            Exit Function
+'        End If
+'    End If
 End Function
 
 Public Function Value_TryParse(s As String, v_out As Variant) As Boolean
-    
+    '
 End Function
 
 ' ^ ############################## ^ '    TryParse Functions    ' ^ ############################## ^ '
@@ -1070,9 +1463,9 @@ Public Function ConvertFromUTF8(ByRef Source() As Byte) As String
     Dim Size    As Long:       Size = UBound(Source) - LBound(Source) + 1
     Dim pSource As LongPtr: pSource = VarPtr(Source(LBound(Source)))
     Dim Length  As Long:     Length = MultiByteToWideChar(CP_UTF8, 0, pSource, Size, 0, 0)
-    Dim Buffer  As String:   Buffer = Space$(Length)
-    MultiByteToWideChar CP_UTF8, 0, pSource, Size, StrPtr(Buffer), Length
-    ConvertFromUTF8 = Buffer
+    Dim buffer  As String:   buffer = Space$(Length)
+    MultiByteToWideChar CP_UTF8, 0, pSource, Size, StrPtr(buffer), Length
+    ConvertFromUTF8 = buffer
     
 End Function
 
