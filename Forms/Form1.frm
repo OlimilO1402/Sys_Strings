@@ -465,6 +465,52 @@ Private Sub BtnTestTryParse_Click()
     s = BinLng_ToStr(l): sl = sl & "BinLng_ToStr(" & l & ") = " & s & vbCrLf
     l = 0: If BinLng_TryParse(s, l) Then sl = sl & "BinLng_TryParse(" & s & ") = " & l & vbCrLf
     
+    vt = vbEmpty: v = 0
+    s = "123": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "-123": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "1234": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "12345678": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "-12345678": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "-12345678.12345": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "-12345678.12345!": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "-12345678.12345@": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "-12345678.12345€": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "-12345678.12345€": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "-12345678.12345#": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    vt = vbEmpty: v = 0
+    s = "&HABCDEF12": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    vt = vbEmpty: v = 0
+    s = "&HCAFEBABE": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    vt = vbEmpty: v = 0
+    s = "&O01234567": If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    vt = vbEmpty: v = 0
+    s = "&B0101010":  If Numeric_TryParse(s, vt, v) Then sl = sl & "Numeric_TryParse(" & s & ", " & VBVarType_ToStr(vt) & ") = " & v & " As " & VBVarType_ToStr(VarType(v)) & vbCrLf
+    
+    
+    'I could be brown,   I could be blue,   I could be violet sky
+    'I could be hurtful, I could be purple, I could be anything you like
+    
     Text2.Text = sl
 End Sub
 

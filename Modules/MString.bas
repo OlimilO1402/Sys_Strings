@@ -1,7 +1,7 @@
 Attribute VB_Name = "MString"
-Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336; 2022.11.01 Zeilen: 625;
-'https://learn.microsoft.com/de-de/cpp/text/how-to-convert-between-various-string-types?view=msvc-170
+Option Explicit 'Zeilen: 129; 2022.01.06 Zeilen: 336; 2022.11.01 Zeilen: 625; 2024-06-24 Zeilen: 1595;
 
+'https://learn.microsoft.com/de-de/cpp/text/how-to-convert-between-various-string-types?view=msvc-170
 'https://de.wikipedia.org/wiki/Byte_Order_Mark
 Public Enum EByteOrderMark
 
@@ -67,7 +67,7 @@ End Type
 #If False Then
     Value
 #End If
-'Extension to vbvartype
+'vbvartype here is used for vbtypeids also, this are extensions to vbtypeids maybe we should have an enum?
 Private Const vbHex As Long = &H10000
 Private Const vbOct As Long = &H20000
 Private Const vbBin As Long = &H40000
@@ -86,7 +86,7 @@ Public CurrencySymbol   As String
 '    StrPtrWA = StrPtr(s_inout)
 '#End If
 'End Function
-
+'
 'Public Sub WACorr(ByRef s_inout As String)
 '#If Unicode Then
 '    '
@@ -202,7 +202,7 @@ End Function
 
 'String-Routinen
 Public Function DeleteMultiWS(s As String) As String
-    'Replace Recursive Delete Multi WhiteSpace WS
+    'Recursive replace/delete multi WhiteSpaces WS
     DeleteMultiWS = Trim$(s)
     If InStr(1, s, "  ") = 0 Then Exit Function
     DeleteMultiWS = Replace(s, "  ", " ")
@@ -210,6 +210,7 @@ Public Function DeleteMultiWS(s As String) As String
 End Function
 
 Public Function DeleteCRLF(s As String) As String
+    'Recursive replace/delete multi crlfs
     DeleteCRLF = Trim$(s)
     If InStr(1, s, vbLf) = 0 Then Exit Function
     If InStr(1, s, vbCr) = 0 Then Exit Function
@@ -272,7 +273,7 @@ Public Function ReplaceAll(ByVal Expression As String, Find As String, Replace A
     ReplaceAll = Expression
 End Function
 
-
+' v ############################## v '    TryParse & ToStr Functions    ' v ############################## v '
 'Converters to or from String
 'Bool
 Public Function BoolToYesNo(ByVal b As Boolean) As String
@@ -315,7 +316,6 @@ Public Function BolToStr(ByVal b As Boolean) As String
     If b Then BolToStr = "True" Else BolToStr = "False"
 End Function
 
-' v ############################## v '    TryParse Functions    ' v ############################## v '
 Public Function Byte_TryParse(ByVal Value As String, ByRef Value_out As Byte) As Boolean
 Try: On Error GoTo Catch
     Value_out = CByte(Value)
@@ -367,7 +367,8 @@ Try: On Error GoTo Catch
     Value = Trim(Value)
     If Right(Value, 1) = "!" Then Value = Left(Value, Len(Value) - 1)
     Value = Replace(Value, ",", ".")
-    Value_out = CSng(Val(Value))
+    'Value_out = CSng(Val(Value))
+    Value_out = CSng(Value)
     Single_TryParse = True
     Exit Function
 Catch:
@@ -538,6 +539,7 @@ Try: On Error GoTo Catch
     Dim i As Integer, lng As Long
     If vtid_out = VbVarType.vbEmpty Then
         If l < 6 Then
+            'vtid_out
             Value_out = CInt(s)
         Else
             Value_out = CLng(s)
@@ -545,6 +547,12 @@ Try: On Error GoTo Catch
     ElseIf vtid_out = VbVarType.vbLong Then
         Value_out = CLng(s)
     End If
+    
+    'Soll man den vbtypeid zurückgeben, oder nicht?
+    'NEIN es soll nur vbtypeid zurückgegeben werden wenn einer hinten dranhängt
+    'wenn kein vbtypeid hinten dranhängt dann soll empty zurückgegeben werden!
+    
+    vtid_out = vtid_out Or vbHex
     Hex_TryParse = True
 Catch:
 End Function
@@ -595,7 +603,6 @@ Try: On Error GoTo Catch
     'there is either % for integer, or & for long or none
     If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
     If Not IsOct(Mid(s, 3)) Then Exit Function
-    Dim i As Integer, lng As Long
     If vtid_out = VbVarType.vbEmpty Then
         If l < 6 Then
             Value_out = CInt(s)
@@ -636,7 +643,7 @@ End Function
 
 Public Function BinInt_ToStr(ByVal Value As Integer) As String
     'with or without starting 0 ?
-    'here first with starting 0
+    'here for now first with all starting 0
     Dim s As String
     Dim i As Long, v As Integer
     For i = 0 To 14
@@ -693,10 +700,36 @@ Public Function BinLng_ToStr(ByVal Value As Long) As String
     BinLng_ToStr = s
 End Function
 
+Public Function Bin_TryParse(ByVal s As String, vtid_out As VbVarType, Value_out) As Boolean
+    'string must be like
+    '&B0, &B10, &B1010100110, &B10&,
+Try: On Error GoTo Catch
+    s = Trim(s)
+    Dim l As Long: l = Len(s)
+    If l < 3 Or 11 < l Then Exit Function
+    If Not IsBinPrefix(s) Then Exit Function
+    'there is either % for integer, or & for long or none
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If Not IsBin(Mid(s, 3)) Then Exit Function
+    Dim i As Integer, lng As Long
+    Bin_TryParse = BinInt_TryParse(s, i)
+    If Bin_TryParse Then
+        vtid_out = vtid_out Or vbBin
+        Value_out = i
+        Exit Function
+    End If
+    Bin_TryParse = BinLng_TryParse(s, lng)
+    If Bin_TryParse Then
+        vtid_out = vtid_out Or vbBin
+        Value_out = l
+        Exit Function
+    End If
+Catch:
+End Function
+
 Public Function CheckType(ByVal s As String, ByVal vt As VbVarType, Value_out) As Boolean
-    
+    'checks if the type vt is inside s and returns the value in value_out
     If vt And vbHex Then vt = vt Xor vbHex
-    
     If vt And vbOct Then vt = vt Xor vbOct
     If vt And vbBin Then vt = vt Xor vbBin
 
@@ -716,7 +749,7 @@ Public Function CheckType(ByVal s As String, ByVal vt As VbVarType, Value_out) A
 End Function
 
 Public Function VBVarType_TryParse(ByVal s As String, vt_out As VbVarType) As Boolean
-    VBVarType_TryParse = True
+    'returns true if s matches any vb-datatype notations and returns the datatype in vt_out
     s = UCase(Trim(s))
     Select Case s
     Case "INTEGER:          vt_out = VbVarType.vbInteger"
@@ -736,28 +769,19 @@ Public Function VBVarType_TryParse(ByVal s As String, vt_out As VbVarType) As Bo
     Case "BYTE":            vt_out = VbVarType.vbByte
     Case "USERDEFINEDTYPE": vt_out = VbVarType.vbUserDefinedType
     Case "ARRAY":           vt_out = VbVarType.vbArray
-    Case Else: VBVarType_TryParse = False
+    Case Else: Exit Function
     End Select
+    VBVarType_TryParse = True
 End Function
 
 Public Function VBVarType_ToStr(ByVal vt As VbVarType) As String
-    
+    'returns a string representation of the vb-datatype in vt
+    'also have a look in MVariant
     Dim s As String
     
-    If vt And vbHex Then
-        s = " (Hex)"
-        vt = vt Xor vbHex
-    End If
-    
-    If vt And vbOct Then
-        s = " (Oct)"
-        vt = vt Xor vbOct
-    End If
-    
-    If vt And vbBin Then
-        s = " (Bin)"
-        vt = vt Xor vbBin
-    End If
+    If vt And vbHex Then s = " (Hex)": vt = vt Xor vbHex
+    If vt And vbOct Then s = " (Oct)": vt = vt Xor vbOct
+    If vt And vbBin Then s = " (Bin)": vt = vt Xor vbBin
     
     Select Case vt
     Case VbVarType.vbEmpty:           s = "None/Empty" & s ' =  0
@@ -806,7 +830,8 @@ End Function
 'vbBin             = &H40000
 
 'https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/data-type-summary
-Public Function VBTypeIdentifier_TryParse(s As String, vt_out As VbVarType) As Boolean
+Public Function VBTypeIdentifier_TryParse(ByVal s As String, vt_out As VbVarType) As Boolean
+    'returns true if s has any vb-type-identifier attached to it and returns the vbtypeid in vt_out
 '%   Ganze Zahl  Dim L%
 '&   Long        Dim M&
 '^   LongLong    Dim N^
@@ -837,6 +862,7 @@ Public Function VBTypeIdentifier_TryParse(s As String, vt_out As VbVarType) As B
 End Function
 
 Public Function Numeric_TryParse(ByVal s As String, vtid_out As Long, Value_out As Variant) As Boolean
+    'returns true if s contains any numeric datatype and returns the optional vbtype-id in vtid_out and the value in value_out
 Try: On Error GoTo Catch
     
     s = Trim(s)
@@ -847,39 +873,42 @@ Try: On Error GoTo Catch
     Numeric_TryParse = Oct_TryParse(s, vtid_out, Value_out)
     If Numeric_TryParse Then vtid_out = vtid_out Or vbOct: Exit Function
     
+    Numeric_TryParse = Bin_TryParse(s, vtid_out, Value_out)
+    If Numeric_TryParse Then vtid_out = vtid_out Or vbBin: Exit Function
+    
+    vtid_out = 0
     If VBTypeIdentifier_TryParse(s, vtid_out) Then
         s = Left(s, Len(s) - 1)
     End If
     
-    Dim byt As Byte
-    Numeric_TryParse = Byte_TryParse(s, byt)
+    Dim byt As Byte:    Numeric_TryParse = Byte_TryParse(s, byt)
     If Numeric_TryParse Then Value_out = byt: Exit Function
     
-    Dim iii As Integer
-    Numeric_TryParse = Integer_TryParse(s, iii)
+    Dim iii As Integer: Numeric_TryParse = Integer_TryParse(s, iii)
     If Numeric_TryParse Then Value_out = iii: Exit Function
     
-    Dim lng As Long
-    Numeric_TryParse = Long_TryParse(s, lng)
+    Dim lng As Long:    Numeric_TryParse = Long_TryParse(s, lng)
     If Numeric_TryParse Then Value_out = lng: Exit Function
     
-    Dim sng As Single
-    Numeric_TryParse = Single_TryParse(s, sng)
-    If Numeric_TryParse Then Value_out = sng: Exit Function
+    'what distinguishes between Single or Double?
+    'the length of the string in characters?
+    'nope everything what has a period is a Double
+    'everything what has a type-identifier is of this type identifier
     
-    Dim dbl As Double
-    Numeric_TryParse = Double_TryParse(s, dbl)
-    If Numeric_TryParse Then Value_out = dbl: Exit Function
-    
-    Dim cur As Currency
-    Numeric_TryParse = Currency_TryParse(s, cur)
-    If Numeric_TryParse Then Value_out = cur: Exit Function
-    
-    Dim dec 'As Long
-    Numeric_TryParse = Decimal_TryParse(s, cur)
-    If Numeric_TryParse Then Value_out = dec: Exit Function
-    
-    
+    Select Case vtid_out
+    Case VbVarType.vbSingle
+        Dim sng As Single:   Numeric_TryParse = Single_TryParse(s, sng)
+        If Numeric_TryParse Then Value_out = sng: Exit Function
+    Case VbVarType.vbCurrency
+        Dim cur As Currency: Numeric_TryParse = Currency_TryParse(s, cur)
+        If Numeric_TryParse Then Value_out = cur: Exit Function
+    Case VbVarType.vbDecimal
+        Dim dec:             Numeric_TryParse = Decimal_TryParse(s, cur)
+        If Numeric_TryParse Then Value_out = dec: Exit Function
+    Case Else
+        Dim dbl As Double:   Numeric_TryParse = Double_TryParse(s, dbl)
+        If Numeric_TryParse Then Value_out = dbl: Exit Function
+    End Select
     
 Catch:
 
@@ -929,8 +958,22 @@ Catch:
 '    End If
 End Function
 
-Public Function Value_TryParse(s As String, v_out As Variant) As Boolean
+Public Function Value_TryParse(ByVal s As String, vtid_out As Long, Value_out As Variant) As Boolean
+    
     '
+    vtid_out = 0
+    
+    Value_TryParse = Numeric_TryParse(s, vtid_out, Value_out)
+    If Value_TryParse Then Exit Function
+    
+    Dim vbid As String:  Value_TryParse = Identifier_TryParse(s, vbid)
+    If Value_TryParse Then Value_out = vbid: Exit Function
+    
+    Dim str  As String:  Value_TryParse = String_TryParse(s, str)
+    If Value_TryParse Then Value_out = str: Exit Function
+    
+    'parsing if its an expression?
+    
 End Function
 
 ' ^ ############################## ^ '    TryParse Functions    ' ^ ############################## ^ '
