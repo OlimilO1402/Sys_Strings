@@ -399,8 +399,15 @@ Private Sub BtnTestTryParse_Click()
     s = "123":            If Byte_TryParse(s, b) Then sl = sl & "Datatype of " & s & " is Byte = " & b & vbCrLf
     s = "12345":          If Integer_TryParse(s, i) Then sl = sl & "Datatype of " & s & " is Integer = " & i & vbCrLf
     s = "1234567":        If Long_TryParse(s, l) Then sl = sl & "Datatype of " & s & " is Long = " & l & vbCrLf
-    s = "1234.567":       If Single_TryParse(s, si) Then sl = sl & "Datatype of " & s & " is Single = " & si & vbCrLf
-    s = "1234567.89012":  If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    s = "1234,567":       If Single_TryParse(s, si) Then sl = sl & "Datatype of " & s & " is Single = " & si & vbCrLf
+    s = "1234567,89012":  If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    s = "-1234567,89012": If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    s = "­1234567,89012": If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    s = "1.#QNAN":        If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    s = "1.#INF":         If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    s = "-1.#INF":        If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    s = "-1.#IND":        If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    
     s = CStr(True):       If Boolean_TryParse(s, bo) Then sl = sl & "Datatype of " & s & " is Boolean = " & bo & vbCrLf
     s = Format(Now):      If Date_TryParse(s, da) Then sl = sl & "Datatype of " & s & " is Date = " & da & vbCrLf
     s = "123456789,1234": If Currency_TryParse(s, cu) Then sl = sl & "Datatype of " & s & " is Currency = " & cu & vbCrLf

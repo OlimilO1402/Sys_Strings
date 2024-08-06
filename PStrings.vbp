@@ -5,6 +5,7 @@ Module=MString; Modules\MString.bas
 Module=MPtr; ..\Ptr_Pointers\Modules\MPtr.bas
 Form=Forms\Form2.frm
 ResFile32="Resources\MyRes.res"
+Module=MMath; ..\Math\Modules\MMath.bas
 IconForm="Form1"
 Startup="Form1"
 HelpFile=""
