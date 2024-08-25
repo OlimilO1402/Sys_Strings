@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form Form2 
+Begin VB.Form FTestUTF8BOM 
    Caption         =   "Form2"
    ClientHeight    =   4395
    ClientLeft      =   19155
@@ -84,7 +84,7 @@ Begin VB.Form Form2
       Width           =   1935
    End
 End
-Attribute VB_Name = "Form2"
+Attribute VB_Name = "FTestUTF8BOM"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
@@ -102,7 +102,7 @@ Private Sub Command1_Click()
 '        Dim buffer() As Byte: buffer = s
 '        s = MString.ConvertFromUTF8(buffer)
 '    End If
-    Text1.Text = s
+    Text1.text = s
 End Sub
 
 Private Sub Command2_Click()
@@ -113,24 +113,24 @@ Private Sub Command2_Click()
         Dim buffer() As Byte: buffer = s
         s = MString.ConvertFromUTF8(buffer)
     End If
-    Text2.Text = s
+    Text2.text = s
 End Sub
 
 Private Sub Command3_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF8_bom.txt"
     Dim s As String: s = FileReadAllString(FNm)
-    Text3.Text = s
+    Text3.text = s
 End Sub
 
 Private Sub Command4_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF16BE_bom.txt"
-    Text4.Text = FileReadAllString(FNm)
+    Text4.text = FileReadAllString(FNm)
 End Sub
 
 Private Sub Command5_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF16LE_bom.txt"
     Dim s As String: s = FileReadAllString(FNm)
-    Text5.Text = s
+    Text5.text = s
 End Sub
 
 Function FileReadAllString(FNm As String) As String
