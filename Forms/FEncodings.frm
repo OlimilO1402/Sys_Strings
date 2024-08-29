@@ -114,10 +114,11 @@ End Sub
 
 Private Sub OptJavaScr_Click()
     txtDecoded.text = vbNullString
-    txtEncoded.text = "\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df, " & vbCrLf & _
-                      "\u00c4hren, \u00d6ltanker, \u00dcberschrift, " & vbCrLf & _
-                      "F\u00e4rberkamille und Wilde M\u00f6hre " & vbCrLf & _
-                      "\u00fcbernehmen die Hauptstra\u00dfe\u\u\u"
+    txtEncoded.text = "\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df, \n" & _
+                      "\u00c4hren, \u00d6ltanker, \u00dcberschrift, \n" & _
+                      "F\u00e4rberkamille und \t Wilde M\u00f6hre \n" & _
+                      "\u00fcbernehmen die Hauptstra\u00dfe\u\u\u\n" & _
+                      "Aus \\u00e4 wird \u00e4"
     '    MsgBox JSEscaped_Decode("")
 '    MsgBox JSEscaped_Decode("\u")
 '    MsgBox JSEscaped_Decode("\u00200")

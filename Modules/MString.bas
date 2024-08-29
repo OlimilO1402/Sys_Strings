@@ -2000,7 +2000,7 @@ Public Sub Base64_EncodeBytes(Source() As Byte, Result_out() As Byte)
     'Dim cnt As Long: cnt = 0
     Dim i As Long, k As Long
     Dim c1 As Integer, c2 As Integer, c3 As Integer
-    Dim w(0 To 3) As Integer
+    Dim W(0 To 3) As Integer
     For i = 0 To n / 3 - 1
         
         k = 3 * i 'Damit k nur einmal statt dreimal berechnet werden muss.
@@ -2008,16 +2008,16 @@ Public Sub Base64_EncodeBytes(Source() As Byte, Result_out() As Byte)
         c2 = Source(k + 1)
         c3 = Source(k + 2)
         
-        w(0) = Int(c1 / 4)  ' Je 6 Bit werden extrahiert
-        w(1) = (c1 And 3) * 16 + Int(c2 / 16)
-        w(2) = (c2 And 15) * 4 + Int(c3 / 64)
-        w(3) = (c3 And 63)
+        W(0) = Int(c1 / 4)  ' Je 6 Bit werden extrahiert
+        W(1) = (c1 And 3) * 16 + Int(c2 / 16)
+        W(2) = (c2 And 15) * 4 + Int(c3 / 64)
+        W(3) = (c3 And 63)
         
         k = 4 * i 'Damit k nur einmal statt viermal berechnet werden muss
-        Result_out(k + 0) = B64(w(0)) ' Die 6-Bit-Werte werden nach Tabelle
-        Result_out(k + 1) = B64(w(1)) ' durch Zeichen ersetzt.
-        Result_out(k + 2) = B64(w(2))
-        Result_out(k + 3) = B64(w(3))
+        Result_out(k + 0) = B64(W(0)) ' Die 6-Bit-Werte werden nach Tabelle
+        Result_out(k + 1) = B64(W(1)) ' durch Zeichen ersetzt.
+        Result_out(k + 2) = B64(W(2))
+        Result_out(k + 3) = B64(W(3))
         
     Next
     
@@ -2076,27 +2076,72 @@ End Function
 '    MsgBox JSEscaped_Decode("\u")
 '    MsgBox JSEscaped_Decode("\u00200")
 '    MsgBox JSEscaped_Decode("\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df, \u00c4hren, \u00d6ltanker, \u00dcberschrift, F\u00e4rberkamille und Wilde M\u00f6hre \u00fcbernehmen die Hauptstra\u00dfe\u\u\u")
-Function JSEscaped_Decode(ByVal Value As String) As String
+'Function JSEscaped_Decode(ByVal Value As String) As String
+'    Dim ch As String, sHex As String
+'    Dim cl As Long, pos As Long: pos = 1
+'    Dim L As Long: L = Len(Value)
+'    If L = 0 Then Exit Function
+'    Do While pos <= L
+'        pos = InStrB(pos, Value, "\u")
+'        If pos = 0 Then Exit Do
+'        sHex = MidB(Value, pos + 4, 8) 'ist der Hexstring immer 4 Zeichen lang?
+'        If LenB(sHex) < 8 Then Exit Do
+'        If IsHex(sHex) Then
+'            cl = CLng("&H" & sHex)
+'            ch = ChrW(cl)
+'            Value = Replace(Value, "\u" & sHex, ch)
+'            pos = pos + 2
+'            L = Len(Value)
+'        Else: pos = pos + 4
+'        End If
+'    Loop
+'    JSEscaped_Decode = Value
+'End Function
+Public Function JSEscaped_Decode(ByVal Value As String) As String
     Dim ch As String, sHex As String
     Dim cl As Long, pos As Long: pos = 1
-    Dim l As Long: l = Len(Value)
+    Dim l As Long: l = LenB(Value)
     If l = 0 Then Exit Function
-    Do While pos <= l
-        pos = InStrB(pos, Value, "\u")
+    Dim pl As Long, sl As String
+    Do While pos < l
+        pos = InStrB(pos, Value, "\")
         If pos = 0 Then Exit Do
-        sHex = MidB(Value, pos + 4, 8) 'ist der Hexstring immer 4 Zeichen lang?
-        If LenB(sHex) < 8 Then Exit Do
-        If IsHex(sHex) Then
-            cl = CLng("&H" & sHex)
-            ch = ChrW(cl)
-            Value = Replace(Value, "\u" & sHex, ch)
+        ch = MidB(Value, pos + 2, 2)
+        cl = AscW(ch)
+        Select Case cl
+        Case 92 '"\" 'it's just an escaped "\", replace " \\" with "\"
+            pl = pos \ 2
+            sl = Left(Value, pl)
+            ch = "\"
+            Value = sl & Replace(Value, "\\", ch, pl + 1, 1)
             pos = pos + 2
-            l = Len(Value)
-        Else: pos = pos + 4
-        End If
+        Case 110 '"n" insert crlf
+            pl = pos \ 2
+            sl = Left(Value, pl)
+            ch = vbCrLf
+            Value = sl & Replace(Value, "\n", ch, pl + 1, 1)
+            pos = pos + 2
+        Case 116 '"t" insert tab
+            pl = pos \ 2
+            sl = Left(Value, pl)
+            ch = vbTab
+            Value = sl & Replace(Value, "\t", ch, pl + 1, 1)
+            pos = pos + 2
+        Case 117 '"u"
+            sHex = MidB(Value, pos + 4, 8)
+            If IsHex(sHex) Then
+                cl = CLng("&H" & sHex)
+                ch = ChrW(cl)
+                'pl = Max(1, pos \ 2)
+                pl = pos \ 2
+                sl = Left(Value, pl)
+                Value = sl & Replace(Value, "\u" & sHex, ch, pl + 1, 1)
+            End If
+            pos = pos + 2
+        End Select
+        l = LenB(Value)
     Loop
     JSEscaped_Decode = Value
 End Function
-
 ' ^ ' ############################## ' ^ '    Encoding functions    ' ^ ' ############################## ' ^ '
 
