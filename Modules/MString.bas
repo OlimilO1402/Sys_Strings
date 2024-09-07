@@ -2133,31 +2133,10 @@ Function JSONEscaped_Encode(ByVal Value As String) As String
     '
 End Function
 
-'    MsgBox JSEscaped_Decode("")
-'    MsgBox JSEscaped_Decode("\u")
-'    MsgBox JSEscaped_Decode("\u00200")
-'    MsgBox JSEscaped_Decode("\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df, \u00c4hren, \u00d6ltanker, \u00dcberschrift, F\u00e4rberkamille und Wilde M\u00f6hre \u00fcbernehmen die Hauptstra\u00dfe\u\u\u")
-'Function JSEscaped_Decode(ByVal Value As String) As String
-'    Dim ch As String, sHex As String
-'    Dim cl As Long, pos As Long: pos = 1
-'    Dim L As Long: L = Len(Value)
-'    If L = 0 Then Exit Function
-'    Do While pos <= L
-'        pos = InStrB(pos, Value, "\u")
-'        If pos = 0 Then Exit Do
-'        sHex = MidB(Value, pos + 4, 8) 'ist der Hexstring immer 4 Zeichen lang?
-'        If LenB(sHex) < 8 Then Exit Do
-'        If IsHex(sHex) Then
-'            cl = CLng("&H" & sHex)
-'            ch = ChrW(cl)
-'            Value = Replace(Value, "\u" & sHex, ch)
-'            pos = pos + 2
-'            L = Len(Value)
-'        Else: pos = pos + 4
-'        End If
-'    Loop
-'    JSEscaped_Decode = Value
-'End Function
+'JSONEscaped_Decode("")
+'JSONEscaped_Decode("\u")
+'JSONEscaped_Decode("\u00200")
+'JSONEscaped_Decode("\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df, \u00c4hren, \u00d6ltanker, \u00dcberschrift, F\u00e4rberkamille und Wilde M\u00f6hre \u00fcbernehmen die Hauptstra\u00dfe\u\u\u")
 Public Function JSONEscaped_Decode(ByVal Value As String) As String
     Dim ch As String, sHex As String
     Dim cl As Long, pos As Long: pos = 1
@@ -2205,9 +2184,32 @@ Public Function JSONEscaped_Decode(ByVal Value As String) As String
     JSONEscaped_Decode = Value
 End Function
 
+'Public Function URLEscaped_EncodeToUTF8(Value As String) As String
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'
+'End Function
+
 '"Spa%C3%9F"
 '=Spaß in utf8
 Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
+    'https://de.wikipedia.org/wiki/URL-Encoding
     Dim ch As String, sHex As String
     Dim cl As Long, pos As Long: pos = 1
     Dim L As Long: L = LenB(Value)
