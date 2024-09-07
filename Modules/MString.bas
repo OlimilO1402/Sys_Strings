@@ -2206,8 +2206,7 @@ End Function
 '
 'End Function
 
-'"Spa%C3%9F"
-'=Spaﬂ in utf8
+'"Spa%C3%9F" ="Spaﬂ" in utf8
 Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
     'https://de.wikipedia.org/wiki/URL-Encoding
     Dim ch As String, sHex As String
