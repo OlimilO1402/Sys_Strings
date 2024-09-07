@@ -235,12 +235,12 @@ Public Function DeleteMultiWS(s As String) As String
     DeleteMultiWS = DeleteMultiWS(DeleteMultiWS)
 End Function
 
-Public Function DeleteCRLF(s As String) As String
+Public Function DeleteCRLF(s As String, Optional replacewith As String = " ") As String
     'Recursive replace/delete multi crlfs
     DeleteCRLF = Trim$(s)
     If InStr(1, s, vbLf) = 0 Then Exit Function
     If InStr(1, s, vbCr) = 0 Then Exit Function
-    DeleteCRLF = Replace(Replace(Replace(s, vbCrLf, " "), vbLf, " "), vbCr, " ")
+    DeleteCRLF = Replace(Replace(Replace(s, vbCrLf, replacewith), vbLf, replacewith), vbCr, replacewith)
     DeleteCRLF = DeleteCRLF(DeleteCRLF)
 End Function
 
@@ -1997,10 +1997,9 @@ Public Sub Base64_EncodeBytes(Source() As Byte, Result_out() As Byte)
     
     ReDim Result_out(0 To n * 4 / 3 - 1) As Byte ' Das Ergebnis ist 4/3 mal so lang
     
-    'Dim cnt As Long: cnt = 0
     Dim i As Long, k As Long
     Dim c1 As Integer, c2 As Integer, c3 As Integer
-    Dim W(0 To 3) As Integer
+    Dim w(0 To 3) As Integer
     For i = 0 To n / 3 - 1
         
         k = 3 * i 'Damit k nur einmal statt dreimal berechnet werden muss.
@@ -2008,16 +2007,16 @@ Public Sub Base64_EncodeBytes(Source() As Byte, Result_out() As Byte)
         c2 = Source(k + 1)
         c3 = Source(k + 2)
         
-        W(0) = Int(c1 / 4)  ' Je 6 Bit werden extrahiert
-        W(1) = (c1 And 3) * 16 + Int(c2 / 16)
-        W(2) = (c2 And 15) * 4 + Int(c3 / 64)
-        W(3) = (c3 And 63)
+        w(0) = Int(c1 / 4)  ' Je 6 Bit werden extrahiert
+        w(1) = (c1 And 3) * 16 + Int(c2 / 16)
+        w(2) = (c2 And 15) * 4 + Int(c3 / 64)
+        w(3) = (c3 And 63)
         
         k = 4 * i 'Damit k nur einmal statt viermal berechnet werden muss
-        Result_out(k + 0) = B64(W(0)) ' Die 6-Bit-Werte werden nach Tabelle
-        Result_out(k + 1) = B64(W(1)) ' durch Zeichen ersetzt.
-        Result_out(k + 2) = B64(W(2))
-        Result_out(k + 3) = B64(W(3))
+        Result_out(k + 0) = B64(w(0)) ' Die 6-Bit-Werte werden nach Tabelle
+        Result_out(k + 1) = B64(w(1)) ' durch Zeichen ersetzt.
+        Result_out(k + 2) = B64(w(2))
+        Result_out(k + 3) = B64(w(3))
         
     Next
     
@@ -2067,9 +2066,71 @@ Public Sub Base64_DecodeBytes(Source() As Byte, Result_out() As Byte)
     ReDim Preserve Result_out(cnt - 1) ' cut nulls
 End Sub
 
+'https://www.rfc-editor.org/rfc/rfc4627.txt
+'2.5.  Strings
+'
+'   The representation of strings is similar to conventions used in the C
+'   family of programming languages.  A string begins and ends with
+'   quotation marks.  All Unicode characters may be placed within the
+'   quotation marks except for the characters that must be escaped:
+'   quotation mark, reverse solidus, and the control characters (U+0000
+'   through U+001F).
+'
+'   Any character may be escaped.  If the character is in the Basic
+'   Multilingual Plane (U+0000 through U+FFFF), then it may be
+'   represented as a six-character sequence: a reverse solidus, followed
+'   by the lowercase letter u, followed by four hexadecimal digits that
+'   encode the character's code point.  The hexadecimal letters A though
+'   F can be upper or lowercase.  So, for example, a string containing
+'   only a single reverse solidus character may be represented as
+'   "\u005C".
+'
+'   Alternatively, there are two-character sequence escape
+'   representations of some popular characters.  So, for example, a
+'   string containing only a single reverse solidus character may be
+'   represented more compactly as "\\".
+'
+'   To escape an extended character that is not in the Basic Multilingual
+'   Plane, the character is represented as a twelve-character sequence,
+'   encoding the UTF-16 surrogate pair.  So, for example, a string
+'   containing only the G clef character (U+1D11E) may be represented as
+'   "\uD834\uDD1E".
+'
+'
+'
+'Crockford                    Informational                      [Page 4]
+'
+'RFC 4627                          JSON                         July 2006
+'
+'
+'         string = quotation-mark *char quotation-mark
+'
+'         char = unescaped /
+'                escape (
+'                    %x22 /          ; "    quotation mark  U+0022
+'                    %x5C /          ; \    reverse solidus U+005C
+'                    %x2F /          ; /    solidus         U+002F
+'                    %x62 /          ; b    backspace       U+0008
+'                    %x66 /          ; f    form feed       U+000C
+'                    %x6E /          ; n    line feed       U+000A
+'                    %x72 /          ; r    carriage return U+000D
+'                    %x74 /          ; t    tab             U+0009
+'                    %x75 4HEXDIG )  ; uXXXX                U+XXXX
+'
+'         escape = %x5C              ; \
+'
+'         quotation-mark = %x22      ; "
+'
+'         unescaped = %x20-21 / %x23-5B / %x5D-10FFFF
 
-Function JSEscaped_Encode(ByVal Value As String) As String
-    'how?
+Function JSONEscaped_Encode(ByVal Value As String) As String
+    
+    'escape
+    ' " = \u0022
+    ' \ = \u005c
+    ' / = \u002f
+    ' b = \u0008
+    '
 End Function
 
 '    MsgBox JSEscaped_Decode("")
@@ -2097,7 +2158,7 @@ End Function
 '    Loop
 '    JSEscaped_Decode = Value
 'End Function
-Public Function JSEscaped_Decode(ByVal Value As String) As String
+Public Function JSONEscaped_Decode(ByVal Value As String) As String
     Dim ch As String, sHex As String
     Dim cl As Long, pos As Long: pos = 1
     Dim l As Long: l = LenB(Value)
@@ -2143,5 +2204,55 @@ Public Function JSEscaped_Decode(ByVal Value As String) As String
     Loop
     JSEscaped_Decode = Value
 End Function
+
+'"Spa%C3%9F"
+'=Spaﬂ in utf8
+Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
+    Dim ch As String, sHex As String
+    Dim cl As Long, pos As Long: pos = 1
+    Dim l As Long: l = LenB(Value)
+    If l = 0 Then Exit Function
+    Dim pl As Long, sl As String
+    Do While pos < l
+        pos = InStrB(pos, Value, "%")
+        If pos = 0 Then Exit Do
+        ch = MidB(Value, pos, 2)
+        cl = AscW(ch)
+        Select Case cl
+'        Case &H25 '"%"
+'            pl = pos \ 2
+'            sl = Left(Value, pl)
+'            ch = "\"
+'            Value = sl & Replace(Value, "\\", ch, pl + 1, 1)
+'            pos = pos + 2
+'        Case 110 '"n" insert crlf
+'            pl = pos \ 2
+'            sl = Left(Value, pl)
+'            ch = vbCrLf
+'            Value = sl & Replace(Value, "\n", ch, pl + 1, 1)
+'            pos = pos + 2
+'        Case 116 '"t" insert tab
+'            pl = pos \ 2
+'            sl = Left(Value, pl)
+'            ch = vbTab
+'            Value = sl & Replace(Value, "\t", ch, pl + 1, 1)
+'            pos = pos + 2
+        Case &H25 '"%"
+            sHex = MidB(Value, pos + 2, 4)
+            If IsHex(sHex) Then
+                cl = CLng("&H" & sHex)
+                ch = Chr(cl)
+                pl = pos \ 2
+                sl = Left(Value, pl)
+                Value = sl & Replace(Value, "%" & sHex, ch, pl + 1, 1)
+            End If
+            pos = pos + 2
+        End Select
+        l = LenB(Value)
+    Loop
+    Dim b() As Byte: b = StrConv(Value, vbFromUnicode)
+    URLEscaped_DecodeFromUTF8 = MString.ConvertFromUTF8(b)
+End Function
+
 ' ^ ' ############################## ' ^ '    Encoding functions    ' ^ ' ############################## ' ^ '
 

@@ -118,7 +118,7 @@ Private Sub OptJavaScr_Click()
                       "\u00c4hren, \u00d6ltanker, \u00dcberschrift, \n" & _
                       "F\u00e4rberkamille und \t Wilde M\u00f6hre \n" & _
                       "\u00fcbernehmen die Hauptstra\u00dfe\u\u\u\n" & _
-                      "Aus \\u00e4 wird \u00e4"
+                      "Aus \\u00e4 wird \u00e4 \uD834\uDD1E"
     '    MsgBox JSEscaped_Decode("")
 '    MsgBox JSEscaped_Decode("\u")
 '    MsgBox JSEscaped_Decode("\u00200")
@@ -155,7 +155,7 @@ End Sub
 
 Private Sub BtnDecode_Click()
     If OptBase64.Value Then
-        txtDecoded.text = MString.Base64_DecodeString(txtEncoded.text)
+        txtDecoded.text = MString.Base64_DecodeString(MString.DeleteCRLF(txtEncoded.text, ""))
     Else
         txtDecoded.text = MString.JSEscaped_Decode(txtEncoded.text)
     End If
