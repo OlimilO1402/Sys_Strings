@@ -532,11 +532,11 @@ End Function
 Public Function HexInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsHexPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsHexPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1)
+        s = Left(s, L - 1)
         If vt <> VbVarType.vbInteger Then Exit Function
     End If
     If Not IsHex(s) Then Exit Function
@@ -548,11 +548,11 @@ End Function
 Public Function HexLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsHexPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsHexPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1)
+        s = Left(s, L - 1)
         If vt <> VbVarType.vbLong Then Exit Function
     End If
     If Not IsHex(s) Then Exit Function
@@ -566,18 +566,18 @@ Public Function Hex_TryParse(ByVal s As String, vtid_out As VbVarType, ByRef Val
     '&H0, &H12, &HABCDEF12, &H12&,
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
+    Dim L As Long: L = Len(s)
     '&HABCDEF12&
     '12345678901
     '
-    If l < 3 Or 11 < l Then Exit Function
+    If L < 3 Or 11 < L Then Exit Function
     If Not IsHexPrefix(s) Then Exit Function
     'there is either % for integer, or & for long or none
-    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, L - 1)
     If Not IsHex(Mid(s, 3)) Then Exit Function
     Dim i As Integer, lng As Long
     If vtid_out = VbVarType.vbEmpty Then
-        If l < 6 Then
+        If L < 6 Then
             'vtid_out
             Value_out = CInt(s)
         Else
@@ -612,11 +612,11 @@ End Function
 Public Function OctInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsOctPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsOctPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1)
+        s = Left(s, L - 1)
         If vt <> VbVarType.vbInteger Then Exit Function
     End If
     If Not IsOct(s) Then Exit Function
@@ -628,11 +628,11 @@ End Function
 Public Function OctLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsOctPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsOctPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1)
+        s = Left(s, L - 1)
         If vt <> VbVarType.vbLong Then Exit Function
     End If
     If Not IsOct(s) Then Exit Function
@@ -646,17 +646,17 @@ Public Function Oct_TryParse(ByVal s As String, vtid_out As VbVarType, Value_out
     '&H0, &H12, &H12345670, &H12&,
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
+    Dim L As Long: L = Len(s)
     '&H12345678&
     '12345678901
     '
-    If l < 3 Or 11 < l Then Exit Function
+    If L < 3 Or 11 < L Then Exit Function
     If Not IsOctPrefix(s) Then Exit Function
     'there is either % for integer, or & for long or none
-    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, L - 1)
     If Not IsOct(Mid(s, 3)) Then Exit Function
     If vtid_out = VbVarType.vbEmpty Then
-        If l < 6 Then
+        If L < 6 Then
             Value_out = CInt(s)
         Else
             Value_out = CLng(s)
@@ -684,22 +684,22 @@ End Function
 Public Function BinInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsBinPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsBinPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1): l = Len(s)
+        s = Left(s, L - 1): L = Len(s)
         If vt <> VbVarType.vbInteger Then Exit Function
     End If
     If Not IsBin(s) Then Exit Function
-    If 16 < l Then Exit Function
-    Dim i As Long, n As Long: n = MMath.Min(l, 15)
+    If 16 < L Then Exit Function
+    Dim i As Long, n As Long: n = MMath.Min(L, 15)
     Dim v As Integer
     For i = 0 To n - 1
-        If Mid(s, l - i, 1) = "1" Then v = v + 2 ^ i
+        If Mid(s, L - i, 1) = "1" Then v = v + 2 ^ i
     Next
-    If l = 16 Then
-        If Mid(s, l - i, 1) = "1" Then v = v Xor &H8000
+    If L = 16 Then
+        If Mid(s, L - i, 1) = "1" Then v = v Xor &H8000
     End If
     Value_out = v
     BinInt_TryParse = True
@@ -726,22 +726,22 @@ End Function
 Public Function BinLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsBinPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsBinPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1): l = Len(s)
+        s = Left(s, L - 1): L = Len(s)
         If vt <> VbVarType.vbLong Then Exit Function
     End If
     If Not IsBin(s) Then Exit Function
-    If 32 < l Then Exit Function
-    Dim i As Long, n As Long: n = Min(l, 31)
+    If 32 < L Then Exit Function
+    Dim i As Long, n As Long: n = Min(L, 31)
     Dim v As Long
     For i = 0 To n - 1
-        If Mid(s, l - i, 1) = "1" Then v = v + 2 ^ i
+        If Mid(s, L - i, 1) = "1" Then v = v + 2 ^ i
     Next
-    If l = 32 Then
-        If Mid(s, l - i, 1) = "1" Then v = v Xor &H80000000
+    If L = 32 Then
+        If Mid(s, L - i, 1) = "1" Then v = v Xor &H80000000
     End If
     Value_out = v
     BinLng_TryParse = True
@@ -770,11 +770,11 @@ Public Function Bin_TryParse(ByVal s As String, vtid_out As VbVarType, Value_out
     '&B0, &B10, &B1010100110, &B10&,
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If l < 3 Or 11 < l Then Exit Function
+    Dim L As Long: L = Len(s)
+    If L < 3 Or 11 < L Then Exit Function
     If Not IsBinPrefix(s) Then Exit Function
     'there is either % for integer, or & for long or none
-    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, L - 1)
     If Not IsBin(Mid(s, 3)) Then Exit Function
     Dim i As Integer, lng As Long
     Bin_TryParse = BinInt_TryParse(s, i)
@@ -786,7 +786,7 @@ Try: On Error GoTo Catch
     Bin_TryParse = BinLng_TryParse(s, lng)
     If Bin_TryParse Then
         vtid_out = vtid_out Or vbBin
-        Value_out = l
+        Value_out = L
         Exit Function
     End If
 Catch:
@@ -1378,10 +1378,10 @@ Public Function PadCentered(this As String, ByVal totalWidth As Long, Optional B
     If StringLength > totalWidth Then
         PadCentered = this
     Else
-        Dim l As Long: l = (totalWidth - StringLength) \ 2
+        Dim L As Long: L = (totalWidth - StringLength) \ 2
         Dim r As Long: r = (totalWidth - StringLength) / 2
         If Len(paddingChar) Then
-            PadCentered = String$(l, paddingChar) & this & String$(r, paddingChar)
+            PadCentered = String$(L, paddingChar) & this & String$(r, paddingChar)
         Else
             PadCentered = Space$(totalWidth)
             RSet PadCentered = this & Space$(r)
@@ -1504,7 +1504,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
     'ist startindex 1-basiert?
     'If startIndex = 0 And Count = -1 Then
     'Dim pos As Long: pos = Len(s) - startIndex
-    Dim l As Long: l = Len(s)
+    Dim L As Long: L = Len(s)
     If Count < 0 Then
         If startIndex < 0 Then
             Remove = ""
@@ -1515,11 +1515,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = ""
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left$(s, startIndex)
             Exit Function
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             Exit Function
         End If
@@ -1537,11 +1537,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = s
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = s
             Exit Function
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             Exit Function
         End If
@@ -1549,7 +1549,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count < l Then
+    If Count < L Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -1559,22 +1559,22 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < l Then
-            If startIndex + Count < l Then
+        If startIndex < L Then
+            If startIndex + Count < L Then
                 Remove = Left(s, startIndex) & Mid(s, startIndex + Count + 1)
                 Exit Function
             End If
-            If startIndex + Count = l Then
+            If startIndex + Count = L Then
                 Remove = Left(s, startIndex)
                 Exit Function
             End If
-            If l < startIndex + Count Then
+            If L < startIndex + Count Then
                 Remove = Left(s, startIndex)
                 'Error message
                 Exit Function
             End If
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             'Error message
             Exit Function
@@ -1583,7 +1583,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count = l Then
+    If Count = L Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -1593,13 +1593,13 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = "" 'Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left$(s, startIndex)
             'Error message
             Exit Function
         End If
     End If
-    If l < Count Then
+    If L < Count Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -1610,7 +1610,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             'Error message
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left(s, startIndex)
             'Error message
             Exit Function
@@ -1707,11 +1707,11 @@ End Function
 '                                     ' optional gefolgt von          ÿ
 Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOrderMark
     'checks if s starts with any BOM, returns the bom, andalso returns the rest of the string if there is anything left
-    Dim l As Long: l = Len(s)
-    If l < 2 Then Exit Function
+    Dim L As Long: L = Len(s)
+    If L < 2 Then Exit Function
     Dim c1 As Byte: c1 = Asc(Mid(s, 1, 1))
     Dim c2 As Byte: c2 = Asc(Mid(s, 2, 1))
-    If l = 2 Then
+    If L = 2 Then
         Dim ibom As Integer
         ibom = CInt("&H" & Hex2(c2) & Hex2(c1))
         If ibom = EByteOrderMark.bom_UTF_16_BE Or ibom = EByteOrderMark.bom_UTF_16_LE Then
@@ -1720,7 +1720,7 @@ Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOr
     End If
     Dim c3 As Byte, c4 As Byte
     Dim lbom As Long
-    If l > 2 Then
+    If L > 2 Then
         c3 = Asc(Mid(s, 3, 1))
         lbom = CLng("&H" & Hex2(c3) & Hex2(c2) & Hex2(c1))
         If Long_IsBOM(lbom) Then
@@ -1729,7 +1729,7 @@ Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOr
             Exit Function
         End If
     End If
-    If l > 3 Then
+    If L > 3 Then
         c4 = Asc(Mid(s, 4, 1))
         lbom = CLng("&H" & Hex2(c4) & Hex2(c3) & Hex2(c2) & Hex2(c1))
         If Long_IsBOM(lbom) Then
@@ -1985,21 +1985,21 @@ Public Function Base64_DecodeString(Value As String) As String
 End Function
 
 Public Sub Base64_EncodeBytes(Source() As Byte, Result_out() As Byte)
-    Dim l As Long: l = UBound(Source) - LBound(Source) + 1
-    Dim rest As Long: rest = l Mod 3
+    Dim L As Long: L = UBound(Source) - LBound(Source) + 1
+    Dim rest As Long: rest = L Mod 3
     Dim n As Long
     If rest > 0 Then
-        n = ((l \ 3) + 1) * 3
+        n = ((L \ 3) + 1) * 3
         ReDim Preserve Source(0 To n - 1)
     Else
-        n = l
+        n = L
     End If
     
     ReDim Result_out(0 To n * 4 / 3 - 1) As Byte ' Das Ergebnis ist 4/3 mal so lang
     
     Dim i As Long, k As Long
     Dim c1 As Integer, c2 As Integer, c3 As Integer
-    Dim w(0 To 3) As Integer
+    Dim W(0 To 3) As Integer
     For i = 0 To n / 3 - 1
         
         k = 3 * i 'Damit k nur einmal statt dreimal berechnet werden muss.
@@ -2007,16 +2007,16 @@ Public Sub Base64_EncodeBytes(Source() As Byte, Result_out() As Byte)
         c2 = Source(k + 1)
         c3 = Source(k + 2)
         
-        w(0) = Int(c1 / 4)  ' Je 6 Bit werden extrahiert
-        w(1) = (c1 And 3) * 16 + Int(c2 / 16)
-        w(2) = (c2 And 15) * 4 + Int(c3 / 64)
-        w(3) = (c3 And 63)
+        W(0) = Int(c1 / 4)  ' Je 6 Bit werden extrahiert
+        W(1) = (c1 And 3) * 16 + Int(c2 / 16)
+        W(2) = (c2 And 15) * 4 + Int(c3 / 64)
+        W(3) = (c3 And 63)
         
         k = 4 * i 'Damit k nur einmal statt viermal berechnet werden muss
-        Result_out(k + 0) = B64(w(0)) ' Die 6-Bit-Werte werden nach Tabelle
-        Result_out(k + 1) = B64(w(1)) ' durch Zeichen ersetzt.
-        Result_out(k + 2) = B64(w(2))
-        Result_out(k + 3) = B64(w(3))
+        Result_out(k + 0) = B64(W(0)) ' Die 6-Bit-Werte werden nach Tabelle
+        Result_out(k + 1) = B64(W(1)) ' durch Zeichen ersetzt.
+        Result_out(k + 2) = B64(W(2))
+        Result_out(k + 3) = B64(W(3))
         
     Next
     
@@ -2032,17 +2032,17 @@ End Sub
 
 Public Sub Base64_DecodeBytes(Source() As Byte, Result_out() As Byte)
     
-    Dim l As Long: l = UBound(Source) - LBound(Source) + 1
+    Dim L As Long: L = UBound(Source) - LBound(Source) + 1
     
-    Dim rest As Long: rest = l Mod 4
+    Dim rest As Long: rest = L Mod 4
     If rest > 0 Then ' Falls Textlaenge nicht ein Vielfaches von 4 ist
                      ' Werden einfach ein paar Nullen angehaengt.
-        ReDim Preserve Source(0 To l + 4 - rest)
-        l = UBound(Source) - LBound(Source) + 1
+        ReDim Preserve Source(0 To L + 4 - rest)
+        L = UBound(Source) - LBound(Source) + 1
     End If
     
     ' Der String wird in ein Feld umgewandelt
-    ReDim Result_out(0 To l) As Byte ' Das ist mehr Platz als benoetigt, schadet aber nicht.
+    ReDim Result_out(0 To L) As Byte ' Das ist mehr Platz als benoetigt, schadet aber nicht.
     Dim w1 As Integer, w2 As Integer, w3 As Integer, w4 As Integer
     
     Dim cnt As Long
@@ -2161,10 +2161,10 @@ End Function
 Public Function JSONEscaped_Decode(ByVal Value As String) As String
     Dim ch As String, sHex As String
     Dim cl As Long, pos As Long: pos = 1
-    Dim l As Long: l = LenB(Value)
-    If l = 0 Then Exit Function
+    Dim L As Long: L = LenB(Value)
+    If L = 0 Then Exit Function
     Dim pl As Long, sl As String
-    Do While pos < l
+    Do While pos < L
         pos = InStrB(pos, Value, "\")
         If pos = 0 Then Exit Do
         ch = MidB(Value, pos + 2, 2)
@@ -2200,9 +2200,9 @@ Public Function JSONEscaped_Decode(ByVal Value As String) As String
             End If
             pos = pos + 2
         End Select
-        l = LenB(Value)
+        L = LenB(Value)
     Loop
-    JSEscaped_Decode = Value
+    JSONEscaped_Decode = Value
 End Function
 
 '"Spa%C3%9F"
@@ -2210,33 +2210,15 @@ End Function
 Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
     Dim ch As String, sHex As String
     Dim cl As Long, pos As Long: pos = 1
-    Dim l As Long: l = LenB(Value)
-    If l = 0 Then Exit Function
+    Dim L As Long: L = LenB(Value)
+    If L = 0 Then Exit Function
     Dim pl As Long, sl As String
-    Do While pos < l
+    Do While pos < L
         pos = InStrB(pos, Value, "%")
         If pos = 0 Then Exit Do
         ch = MidB(Value, pos, 2)
         cl = AscW(ch)
         Select Case cl
-'        Case &H25 '"%"
-'            pl = pos \ 2
-'            sl = Left(Value, pl)
-'            ch = "\"
-'            Value = sl & Replace(Value, "\\", ch, pl + 1, 1)
-'            pos = pos + 2
-'        Case 110 '"n" insert crlf
-'            pl = pos \ 2
-'            sl = Left(Value, pl)
-'            ch = vbCrLf
-'            Value = sl & Replace(Value, "\n", ch, pl + 1, 1)
-'            pos = pos + 2
-'        Case 116 '"t" insert tab
-'            pl = pos \ 2
-'            sl = Left(Value, pl)
-'            ch = vbTab
-'            Value = sl & Replace(Value, "\t", ch, pl + 1, 1)
-'            pos = pos + 2
         Case &H25 '"%"
             sHex = MidB(Value, pos + 2, 4)
             If IsHex(sHex) Then
@@ -2248,7 +2230,7 @@ Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
             End If
             pos = pos + 2
         End Select
-        l = LenB(Value)
+        L = LenB(Value)
     Loop
     Dim b() As Byte: b = StrConv(Value, vbFromUnicode)
     URLEscaped_DecodeFromUTF8 = MString.ConvertFromUTF8(b)

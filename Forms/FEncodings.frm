@@ -18,6 +18,14 @@ Begin VB.Form FEncodings
    ScaleHeight     =   7095
    ScaleWidth      =   10470
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.OptionButton OptURLDecode 
+      Caption         =   "URL-Decode (%)"
+      Height          =   255
+      Left            =   4200
+      TabIndex        =   8
+      Top             =   120
+      Width           =   1815
+   End
    Begin VB.OptionButton OptJavaScr 
       Caption         =   "JavaScript \u...."
       Height          =   255
@@ -156,8 +164,10 @@ End Sub
 Private Sub BtnDecode_Click()
     If OptBase64.Value Then
         txtDecoded.text = MString.Base64_DecodeString(MString.DeleteCRLF(txtEncoded.text, ""))
-    Else
-        txtDecoded.text = MString.JSEscaped_Decode(txtEncoded.text)
+    ElseIf OptJavaScr.Value Then
+        txtDecoded.text = MString.JSONEscaped_Decode(txtEncoded.text)
+    ElseIf OptURLDecode.Value Then
+        txtDecoded.text = MString.URLEscaped_DecodeFromUTF8(txtEncoded.text)
     End If
 End Sub
 
@@ -208,3 +218,7 @@ Public Function RemoveCRLF(text As String) As String
     
     RemoveCRLF = s
 End Function
+
+Private Sub OptURLDecode_Click()
+    txtEncoded.text = "http://de.wikipedia.org/wiki/Au%C3%9Fengebiete_der_Vereinigten_Staaten"
+End Sub
