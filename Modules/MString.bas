@@ -23,6 +23,14 @@ Public Enum EByteOrderMark
 
 End Enum
 
+#If VBA7 Then
+Public Enum ShiftConstants
+     vbShiftMask = 1
+     vbCtrlMask = 2
+     vbAltMask = 4
+End Enum
+#End If
+
 'Maybe we need an enum Encoding
 Private Const CP_UTF8 As Long = 65001
 
@@ -598,15 +606,37 @@ End Function
 
 Public Function Hex_ToStr(ByVal Value) As String
     Dim s As String: s = "&H"
-    Select Case VarType(Value)
+    Dim vt0 As VbVarType: vt0 = VarType(Value)
+    Select Case vt0
     Case VbVarType.vbByte:     s = s & Hex(CByte(Value)) ' Hex2(CByte(Value))
     Case VbVarType.vbInteger:  s = s & Hex(CInt(Value))  ' Hex4(CInt(Value))
     Case VbVarType.vbLong:     s = s & Hex(CLng(Value))  ' Hex8(CLng(Value))
     Case VbVarType.vbCurrency: s = s & Hex16(CCur(Value))
-    Case VbVarType.vbDecimal:  's = s & Hex32(CDec(Value))
+    Case VbVarType.vbDecimal:  's = s & Hex32(CDec(Value)) ' ???
                                s = s & Hex16(CCur(Value))
+    Case Else
+        If vt0 And VbVarType.vbArray = VbVarType.vbArray Then
+            Dim vt1 As VbVarType: vt1 = vt0 Xor VbVarType.vbArray
+            Select Case vt1
+            Case VbVarType.vbByte: s = s & ByteArray_ToHex(Value)
+            End Select
+        End If
     End Select
     Hex_ToStr = s
+End Function
+
+'Private Function ByteArray_ToHex(Bytes() As Byte) As String
+Private Function ByteArray_ToHex(Value) As String
+    Dim Bytes() As Byte: Bytes = Value
+    Dim i As Long, s As String
+    Dim lb As Long: lb = LBound(Bytes)
+    Dim ub As Long: ub = UBound(Bytes)
+    Dim n As Long: n = ub - lb + 1
+    If n > 1024 Then Exit Function
+    For i = lb To ub
+        s = s & Hex2(Bytes(i))
+    Next
+    ByteArray_ToHex = s
 End Function
 
 Public Function OctInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
@@ -1897,33 +1927,32 @@ End Function
 ' ^ ' ############################## ' ^ '    Special functions    ' ^ ' ############################## ' ^ '
 
 ' v ' ############################## ' v '    Keyboard functions    ' v ' ############################## ' v '
-
-Public Function IsAlt(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyToCheck As KeyCodeConstants) As Boolean
-    IsAlt = (KeyCode = KeyToCheck) And (Shift = ShiftConstants.vbAltMask)
+Public Function IsAlt(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyCodeConstants_KeyToCheck As Long) As Boolean
+    IsAlt = (KeyCode = KeyCodeConstants_KeyToCheck) And (Shift = ShiftConstants.vbAltMask)
 End Function
 
-Public Function IsCtrl(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyToCheck As KeyCodeConstants) As Boolean
-    IsCtrl = (KeyCode = KeyToCheck) And (Shift = ShiftConstants.vbCtrlMask)
+Public Function IsCtrl(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyCodeConstants_KeyToCheck As Long) As Boolean
+    IsCtrl = (KeyCode = KeyCodeConstants_KeyToCheck) And (Shift = ShiftConstants.vbCtrlMask)
 End Function
 
-Public Function IsShift(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyToCheck As KeyCodeConstants) As Boolean
-    IsShift = (KeyCode = KeyToCheck) And (Shift = ShiftConstants.vbShiftMask)
+Public Function IsShift(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyCodeConstants_KeyToCheck As Long) As Boolean
+    IsShift = (KeyCode = KeyCodeConstants_KeyToCheck) And (Shift = ShiftConstants.vbShiftMask)
 End Function
 
-Public Function IsCtrlAlt(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyToCheck As KeyCodeConstants) As Boolean
-    IsCtrlAlt = (KeyCode = KeyToCheck) And (Shift = (ShiftConstants.vbCtrlMask Or ShiftConstants.vbAltMask))
+Public Function IsCtrlAlt(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyCodeConstants_KeyToCheck As Long) As Boolean
+    IsCtrlAlt = (KeyCode = KeyCodeConstants_KeyToCheck) And (Shift = (ShiftConstants.vbCtrlMask Or ShiftConstants.vbAltMask))
 End Function
 
-Public Function IsShiftAlt(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyToCheck As KeyCodeConstants) As Boolean
-    IsShiftAlt = (KeyCode = KeyToCheck) And (Shift = (ShiftConstants.vbShiftMask Or ShiftConstants.vbAltMask))
+Public Function IsShiftAlt(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyCodeConstants_KeyToCheck As Long) As Boolean
+    IsShiftAlt = (KeyCode = KeyCodeConstants_KeyToCheck) And (Shift = (ShiftConstants.vbShiftMask Or ShiftConstants.vbAltMask))
 End Function
 
-Public Function IsCtrlShift(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyToCheck As KeyCodeConstants) As Boolean
-    IsCtrlShift = (KeyCode = KeyToCheck) And (Shift = (ShiftConstants.vbCtrlMask Or ShiftConstants.vbShiftMask))
+Public Function IsCtrlShift(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyCodeConstants_KeyToCheck As Long) As Boolean
+    IsCtrlShift = (KeyCode = KeyCodeConstants_KeyToCheck) And (Shift = (ShiftConstants.vbCtrlMask Or ShiftConstants.vbShiftMask))
 End Function
 
-Public Function IsCtrlShiftAlt(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyToCheck As KeyCodeConstants) As Boolean
-    IsCtrlShiftAlt = (KeyCode = KeyToCheck) And (Shift = (ShiftConstants.vbCtrlMask Or ShiftConstants.vbShiftMask Or ShiftConstants.vbAltMask))
+Public Function IsCtrlShiftAlt(ByVal KeyCode As Integer, ByVal Shift As Integer, ByVal KeyCodeConstants_KeyToCheck As Long) As Boolean
+    IsCtrlShiftAlt = (KeyCode = KeyCodeConstants_KeyToCheck) And (Shift = (ShiftConstants.vbCtrlMask Or ShiftConstants.vbShiftMask Or ShiftConstants.vbAltMask))
 End Function
 
 'Testing:
