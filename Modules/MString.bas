@@ -310,23 +310,27 @@ End Function
 ' v ############################## v '    TryParse & ToStr Functions    ' v ############################## v '
 'Converters to or from String
 'Bool
-Public Function BoolToYesNo(ByVal b As Boolean) As String
+Public Function BoolToYesNo(ByVal B As Boolean) As String
     'BoolToYesNo = IIf(b, "yes ", " no ")
-    BoolToYesNo = IIf(b, " Ja ", "Nein")
+    BoolToYesNo = IIf(B, " Ja ", "Nein")
+End Function
+
+Public Function CBol(ByVal s As String) As Boolean
+Try: On Error GoTo Catch
+    s = UCase$(Trim$(s))
+    If s = "YES" Then CBol = True: Exit Function
+    If s = "JA" Then CBol = True: Exit Function
+    If s = "OK" Then CBol = True: Exit Function
+    If s = "1" Then CBol = True: Exit Function
+    If s = "-1" Then CBol = True: Exit Function
+    If s = "WAHR" Then CBol = True: Exit Function
+    If s = "TRUE" Then CBol = True: Exit Function
+    CBol = CBool(s)
+Catch:
 End Function
 
 Public Function StrToBol(ByVal s As String) As Boolean
-Try: On Error GoTo Catch
-    s = LCase$(Trim$(s))
-    If s = "yes" Then StrToBol = True: Exit Function
-    If s = "ja" Then StrToBol = True: Exit Function
-    If s = "ok" Then StrToBol = True: Exit Function
-    If s = "1" Then StrToBol = True: Exit Function
-    If s = "-1" Then StrToBol = True: Exit Function
-    If s = "wahr" Then StrToBol = True: Exit Function
-    If s = "true" Then StrToBol = True: Exit Function
-    StrToBol = CBool(s)
-Catch:
+    StrToBol = CBol(s)
 End Function
 
 'Private Function StrToBol(StrVal As String) As Boolean
@@ -346,8 +350,8 @@ End Function
 '    End If
 'End Function
 
-Public Function BolToStr(ByVal b As Boolean) As String
-    If b Then BolToStr = "True" Else BolToStr = "False"
+Public Function BolToStr(ByVal B As Boolean) As String
+    If B Then BolToStr = "True" Else BolToStr = "False"
 End Function
 
 Public Function Byte_TryParse(ByVal Value As String, ByRef Value_out As Byte) As Boolean
@@ -501,15 +505,15 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
-Public Function Array_ToStr(arr) As String
+Public Function Array_ToStr(Arr) As String
     Dim i As Long, s As String: s = "("
-    If IsObject(arr(0)) Then
-        For i = LBound(arr) To UBound(arr)
-            s = s & arr(i).ToStr & "; "
+    If IsObject(Arr(0)) Then
+        For i = LBound(Arr) To UBound(Arr)
+            s = s & Arr(i).ToStr & "; "
         Next
     Else
-        For i = LBound(arr) To UBound(arr)
-            s = s & CStr(arr(i)) & "; "
+        For i = LBound(Arr) To UBound(Arr)
+            s = s & CStr(Arr(i)) & "; "
         Next
     End If
     Array_ToStr = s & ")"
@@ -966,19 +970,19 @@ Public Function VBTypeIdentifier_TryParse(ByVal s As String, vt_out As VbVarType
     'in a second step check if the value matches the type identifier
     
     If Len(s) = 0 Then Exit Function
-    Dim b As Boolean, ti As String: ti = Right(s, 1)
+    Dim B As Boolean, ti As String: ti = Right(s, 1)
     Select Case ti
-    Case "%": vt_out = VbVarType.vbInteger:  b = True
-    Case "&": vt_out = VbVarType.vbLong:     b = True
+    Case "%": vt_out = VbVarType.vbInteger:  B = True
+    Case "&": vt_out = VbVarType.vbLong:     B = True
 #If VBA7 Then
-    Case "^": vt_out = VbVarType.vbLongLong: b = True
+    Case "^": vt_out = VbVarType.vbLongLong: B = True
 #End If
-    Case "@": vt_out = VbVarType.vbCurrency: b = True
-    Case "!": vt_out = VbVarType.vbSingle:   b = True
-    Case "#": vt_out = VbVarType.vbDouble:   b = True
-    Case "$": vt_out = VbVarType.vbString:   b = True
+    Case "@": vt_out = VbVarType.vbCurrency: B = True
+    Case "!": vt_out = VbVarType.vbSingle:   B = True
+    Case "#": vt_out = VbVarType.vbDouble:   B = True
+    Case "$": vt_out = VbVarType.vbString:   B = True
     End Select
-    VBTypeIdentifier_TryParse = b
+    VBTypeIdentifier_TryParse = B
 End Function
 
 Public Function VBTypeIdentifier_ToStr(ByVal vtid As VbVarType) As String
@@ -1120,7 +1124,7 @@ End Function
 
 ' ^ ############################## ^ '    TryParse Functions    ' ^ ############################## ^ '
 
-' v ############################## v '    Hex, Oct, Bin ToStr Functions    ' v ############################## v '
+' v ############################## v '    Hex, Dec, Oct, Bin ToStr Functions    ' v ############################## v '
 
 Public Function Hex2(ByVal Value As Byte) As String
     Hex2 = Hex(Value): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
@@ -1138,6 +1142,10 @@ Public Function Hex16(ByVal Value As Currency) As String
     Dim tc As TCur:  tc.Value = Value
     Dim tl As TLong2: LSet tl = tc
     Hex16 = Hex8(tl.Hi) & Hex8(tl.Lo)
+End Function
+
+Public Function Dec2(ByVal Value As Long) As String
+    Dec2 = CStr(Value): If Len(Dec2) < 2 Then Dec2 = "0" & Dec2
 End Function
 
 Public Function Oct3(ByVal Value As Byte) As String
@@ -1840,9 +1848,9 @@ Public Function ConvertFromUTF8(ByRef Source() As Byte) As String
     Dim Size    As Long:       Size = UBound(Source) - LBound(Source) + 1
     Dim pSource As LongPtr: pSource = VarPtr(Source(LBound(Source)))
     Dim Length  As Long:     Length = MultiByteToWideChar(CP_UTF8, 0, pSource, Size, 0, 0)
-    Dim buffer  As String:   buffer = Space$(Length)
-    MultiByteToWideChar CP_UTF8, 0, pSource, Size, StrPtr(buffer), Length
-    ConvertFromUTF8 = buffer
+    Dim Buffer  As String:   Buffer = Space$(Length)
+    MultiByteToWideChar CP_UTF8, 0, pSource, Size, StrPtr(Buffer), Length
+    ConvertFromUTF8 = Buffer
 End Function
 
 ' ^ ' ############################## ' ^ '    Unicode-BOM functions    ' ^ ' ############################## ' ^ '
@@ -1882,8 +1890,8 @@ End Function
 Public Function GetTabbedText(s As String, Optional onlyNewLine As Boolean = False, Optional NumOnly As Boolean = False) As String
     'takes any string, first replaces any vbtab into normal space
     'then separates every value in the string with tabs, lines with vbcrlf
-    Dim t As String: t = Replace(s, vbTab, " ")
-    Dim lines() As String: lines = Split(t, vbCrLf)
+    Dim T As String: T = Replace(s, vbTab, " ")
+    Dim lines() As String: lines = Split(T, vbCrLf)
     Dim i As Long
     'Dim onlyNewLine As Boolean: onlyNewLine = False 'Me.cbNewlineOnly.Value
     Dim svbCrLf As String: If onlyNewLine Then svbCrLf = vbCrLf
@@ -2262,8 +2270,8 @@ Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
         End Select
         L = LenB(Value)
     Loop
-    Dim b() As Byte: b = StrConv(Value, vbFromUnicode)
-    URLEscaped_DecodeFromUTF8 = MString.ConvertFromUTF8(b)
+    Dim B() As Byte: B = StrConv(Value, vbFromUnicode)
+    URLEscaped_DecodeFromUTF8 = MString.ConvertFromUTF8(B)
 End Function
 
 ' ^ ' ############################## ' ^ '    Encoding functions    ' ^ ' ############################## ' ^ '
