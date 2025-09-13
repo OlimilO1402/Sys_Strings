@@ -1,5 +1,8 @@
 Attribute VB_Name = "MString"
-Option Explicit 'lines 129; 2022.01.06 lines 336; 2022.11.01 lines 625; 2024-06-24 lines 1595; 2024-07-17 lines 1948; 2024-08-25 lines: 2102;
+Option Explicit 'lines 129; 2022.01.06 lines 336; 2022.11.01 lines 625; 2024-06-24 lines 1595; 2024-07-17 lines 1948; 2024-08-25 lines: 2102; 2025-09-13 lines: 2378;
+'For using this module you also must include:
+'..\Ptr_Pointers\MPtr.bas
+'..\Math\MMath.bas
 
 'https://learn.microsoft.com/de-de/cpp/text/how-to-convert-between-various-string-types?view=msvc-170
 'https://de.wikipedia.org/wiki/Byte_Order_Mark
@@ -336,9 +339,9 @@ End Function
 ' v ############################## v '    TryParse & ToStr Functions    ' v ############################## v '
 'Converters to or from String
 'Bool
-Public Function BoolToYesNo(ByVal B As Boolean) As String
+Public Function BoolToYesNo(ByVal b As Boolean) As String
     'BoolToYesNo = IIf(b, "yes ", " no ")
-    BoolToYesNo = IIf(B, " Ja ", "Nein")
+    BoolToYesNo = IIf(b, " Ja ", "Nein")
 End Function
 
 Public Function CBol(ByVal s As String) As Boolean
@@ -376,8 +379,8 @@ End Function
 '    End If
 'End Function
 
-Public Function BolToStr(ByVal B As Boolean) As String
-    If B Then BolToStr = "True" Else BolToStr = "False"
+Public Function BolToStr(ByVal b As Boolean) As String
+    If b Then BolToStr = "True" Else BolToStr = "False"
 End Function
 
 Public Function Byte_TryParse(ByVal Value As String, ByRef Value_out As Byte) As Boolean
@@ -386,6 +389,11 @@ Try: On Error GoTo Catch
     Byte_TryParse = True
     Exit Function
 Catch:
+End Function
+
+Public Function Byte_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As Byte) As Boolean
+    Byte_TryParseMess = Byte_TryParse(Value, Value_inout)
+    If Not Byte_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbByte))
 End Function
 
 Public Function Integer_TryParse(ByVal Value As String, ByRef Value_out As Integer) As Boolean
@@ -398,12 +406,27 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
+Public Function Integer_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As Integer) As Boolean
+    Integer_TryParseMess = Integer_TryParse(Value, Value_inout)
+    If Not Integer_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbInteger))
+End Function
+
 Public Function Boolean_TryParse(ByVal Value As String, ByRef Value_out As Boolean) As Boolean
 Try: On Error GoTo Catch
+    Value = UCase$(Trim$(Value))
+    Select Case Value
+    Case "YES", "JA", "OK", "1", "-1", "WAHR", "TRUE":           Value = True
+    Case "NO", "NEIN", "NOTOK", "0", "FALSCH", "FALSE", "WRONG": Value = False
+    End Select
     Value_out = CBool(Value)
     Boolean_TryParse = True
     Exit Function
 Catch:
+End Function
+
+Public Function Boolean_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As Boolean) As Boolean
+    Boolean_TryParseMess = Boolean_TryParse(Value, Value_inout)
+    If Not Boolean_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbBoolean))
 End Function
 
 Public Function Long_TryParse(ByVal Value As String, ByRef Value_out As Long) As Boolean
@@ -416,6 +439,11 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
+Public Function Long_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As Long) As Boolean
+    Long_TryParseMess = Long_TryParse(Value, Value_inout)
+    If Not Long_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbLong))
+End Function
+
 #If VBA7 Then
 Public Function LongLong_TryParse(ByVal Value As String, ByRef Value_out As LongLong) As Boolean
 Try: On Error GoTo Catch
@@ -423,6 +451,11 @@ Try: On Error GoTo Catch
     Long_TryParse = True
     Exit Function
 Catch:
+End Function
+
+Public Function LongLong_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As LongLong) As Boolean
+    LongLong_TryParseMess = LongLong_TryParse(Value, Value_inout)
+    If Not LongLong_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbLongLong))
 End Function
 #End If
 
@@ -438,7 +471,12 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
-Public Function Double_TryParse(ByVal Value As String, ByRef Value_out As Double) As Boolean
+Public Function Single_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As Single) As Boolean
+    Single_TryParseMess = Single_TryParse(Value, Value_inout)
+    If Not Single_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbSingle))
+End Function
+
+Public Function Double_TryParse(ByVal Value As String, ByRef Value_inout As Double) As Boolean
 Try: On Error GoTo Catch
     Value = Trim(Value)
     If Len(Value) = 0 Then Exit Function
@@ -446,20 +484,25 @@ Try: On Error GoTo Catch
     Value = Replace(Value, ",", ".") 'for using the function Val()
     If IsNumeric(Value) Then
         'If Right(Value, 1) = "#" Then Value = Left(Value, Len(Value) - 1)
-        Value_out = Val(Value)
+        Value_inout = Val(Value)
         Double_TryParse = True: Exit Function
     Else
         If StrComp(Value, "1.#QNAN") = 0 Then
-            MMath.GetNaN Value_out:           Double_TryParse = True: Exit Function
+            MMath.GetNaN Value_inout:           Double_TryParse = True: Exit Function
         ElseIf StrComp(Value, "1.#INF") = 0 Then
-            Value_out = MMath.GetINF:         Double_TryParse = True: Exit Function
+            Value_inout = MMath.GetINF:         Double_TryParse = True: Exit Function
         ElseIf StrComp(Value, "-1.#INF") = 0 Then
-            Value_out = MMath.GetINF(-1):     Double_TryParse = True: Exit Function
+            Value_inout = MMath.GetINF(-1):     Double_TryParse = True: Exit Function
         ElseIf StrComp(Value, "-1.#IND") = 0 Then
-            MMath.GetINDef Value_out:         Double_TryParse = True: Exit Function
+            MMath.GetINDef Value_inout:         Double_TryParse = True: Exit Function
         End If
     End If
 Catch:
+End Function
+
+Public Function Double_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As Double) As Boolean
+    Double_TryParseMess = Double_TryParse(Value, Value_inout)
+    If Not Double_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbDouble))
 End Function
 
 Public Function Date_TryParse(ByVal Value As String, ByRef Value_out As Date) As Boolean
@@ -467,6 +510,11 @@ Try: On Error GoTo Catch
     Value_out = CDate(Value)
     Date_TryParse = True
 Catch:
+End Function
+
+Public Function Date_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As Date) As Boolean
+    Date_TryParseMess = Date_TryParse(Value, Value_inout)
+    If Not Date_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbDate))
 End Function
 
 Public Function Currency_TryParse(ByVal Value As String, ByRef Value_out As Currency) As Boolean
@@ -482,6 +530,11 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
+Public Function Currency_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As Currency) As Boolean
+    Currency_TryParseMess = Currency_TryParse(Value, Value_inout)
+    If Not Currency_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbCurrency))
+End Function
+
 Public Function Decimal_TryParse(ByVal Value As String, ByRef Value_out) As Boolean
 Try: On Error GoTo Catch
     If Len(DecimalSeparator) = 0 Then DecimalSeparator = Mid(CStr(0.1), 2, 1)
@@ -491,6 +544,11 @@ Try: On Error GoTo Catch
     Decimal_TryParse = True
     Exit Function
 Catch:
+End Function
+
+Public Function Decimal_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout) As Boolean
+    Decimal_TryParseMess = Decimal_TryParse(Value, Value_inout)
+    If Not Decimal_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbDecimal))
 End Function
 
 Public Function String_TryParse(ByVal s As String, Value_out) As Boolean
@@ -531,15 +589,15 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
-Public Function Array_ToStr(Arr) As String
+Public Function Array_ToStr(arr) As String
     Dim i As Long, s As String: s = "("
-    If IsObject(Arr(0)) Then
-        For i = LBound(Arr) To UBound(Arr)
-            s = s & Arr(i).ToStr & "; "
+    If IsObject(arr(0)) Then
+        For i = LBound(arr) To UBound(arr)
+            s = s & arr(i).ToStr & "; "
         Next
     Else
-        For i = LBound(Arr) To UBound(Arr)
-            s = s & CStr(Arr(i)) & "; "
+        For i = LBound(arr) To UBound(arr)
+            s = s & CStr(arr(i)) & "; "
         Next
     End If
     Array_ToStr = s & ")"
@@ -996,19 +1054,19 @@ Public Function VBTypeIdentifier_TryParse(ByVal s As String, vt_out As VbVarType
     'in a second step check if the value matches the type identifier
     
     If Len(s) = 0 Then Exit Function
-    Dim B As Boolean, ti As String: ti = Right(s, 1)
+    Dim b As Boolean, ti As String: ti = Right(s, 1)
     Select Case ti
-    Case "%": vt_out = VbVarType.vbInteger:  B = True
-    Case "&": vt_out = VbVarType.vbLong:     B = True
+    Case "%": vt_out = VbVarType.vbInteger:  b = True
+    Case "&": vt_out = VbVarType.vbLong:     b = True
 #If VBA7 Then
-    Case "^": vt_out = VbVarType.vbLongLong: B = True
+    Case "^": vt_out = VbVarType.vbLongLong: b = True
 #End If
-    Case "@": vt_out = VbVarType.vbCurrency: B = True
-    Case "!": vt_out = VbVarType.vbSingle:   B = True
-    Case "#": vt_out = VbVarType.vbDouble:   B = True
-    Case "$": vt_out = VbVarType.vbString:   B = True
+    Case "@": vt_out = VbVarType.vbCurrency: b = True
+    Case "!": vt_out = VbVarType.vbSingle:   b = True
+    Case "#": vt_out = VbVarType.vbDouble:   b = True
+    Case "$": vt_out = VbVarType.vbString:   b = True
     End Select
-    VBTypeIdentifier_TryParse = B
+    VBTypeIdentifier_TryParse = b
 End Function
 
 Public Function VBTypeIdentifier_ToStr(ByVal vtid As VbVarType) As String
@@ -1916,8 +1974,8 @@ End Function
 Public Function GetTabbedText(s As String, Optional onlyNewLine As Boolean = False, Optional NumOnly As Boolean = False) As String
     'takes any string, first replaces any vbtab into normal space
     'then separates every value in the string with tabs, lines with vbcrlf
-    Dim T As String: T = Replace(s, vbTab, " ")
-    Dim lines() As String: lines = Split(T, vbCrLf)
+    Dim t As String: t = Replace(s, vbTab, " ")
+    Dim lines() As String: lines = Split(t, vbCrLf)
     Dim i As Long
     'Dim onlyNewLine As Boolean: onlyNewLine = False 'Me.cbNewlineOnly.Value
     Dim svbCrLf As String: If onlyNewLine Then svbCrLf = vbCrLf
@@ -2296,8 +2354,8 @@ Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
         End Select
         L = LenB(Value)
     Loop
-    Dim B() As Byte: B = StrConv(Value, vbFromUnicode)
-    URLEscaped_DecodeFromUTF8 = MString.ConvertFromUTF8(B)
+    Dim b() As Byte: b = StrConv(Value, vbFromUnicode)
+    URLEscaped_DecodeFromUTF8 = MString.ConvertFromUTF8(b)
 End Function
 
 Public Function Encoding_GetString(enc As ETextEncoding, Bytes() As Byte) As String
