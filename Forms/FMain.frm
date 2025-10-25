@@ -19,6 +19,14 @@ Begin VB.Form FMain
    ScaleHeight     =   9495
    ScaleWidth      =   15375
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton BtnTestTryParseValidate 
+      Caption         =   "Test TryParseValidate"
+      Height          =   375
+      Left            =   8520
+      TabIndex        =   34
+      Top             =   480
+      Width           =   1935
+   End
    Begin VB.CommandButton BtnTestEncodings 
       Caption         =   "Test Encodings"
       Height          =   375
@@ -388,6 +396,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+Private m_td As TestDummy
 
 Private Sub BtnTestTryParse_Click()
     Dim b As Byte, i As Integer, l As Long, bo As Boolean, si As Single, d As Double, da As Date, cu As Currency, de As Variant, st As String, arr, v, vt As VbVarType
@@ -399,7 +408,7 @@ Private Sub BtnTestTryParse_Click()
     s = "1234567,89012":  If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
     s = "-1234567,89012": If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
     s = "­1234567,89012": If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
-    s = "1.#QNAN":        If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
+    's = "1.#QNAN":        If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & CStr(d) & vbCrLf 'Overflow
     s = "1.#INF":         If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
     s = "-1.#INF":        If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
     s = "-1.#IND":        If Double_TryParse(s, d) Then sl = sl & "Datatype of " & s & " is Double = " & d & vbCrLf
@@ -525,6 +534,12 @@ Private Sub BtnTestEncodings_Click()
     FEncodings.Show
 End Sub
 
+Private Sub BtnTestTryParseValidate_Click()
+    'FTestTryParseValidate.Show vbModal, Me
+    If FTestTryParseValidate.ShowDialog(m_td, Me) = vbCancel Then Exit Sub
+    MsgBox m_td.ToStr
+End Sub
+
 Private Sub Command1_Click()
     Dim s As String: s = "Dies ist ein Teststring"
     Dim Chars() As Integer
@@ -543,29 +558,30 @@ Private Sub Form_Load()
     BtnResetPadRight_Click
     BtnResetPadLeftRight_Click
     BtnResetPadCentered_Click
+    Set m_td = New TestDummy
 End Sub
 
 Private Sub Form_Resize()
-    Dim l As Single, t As Single, w As Single, H As Single
+    Dim l As Single, t As Single, W As Single, H As Single
     Dim m As Single: m = 8 * Screen.TwipsPerPixelX
     
-    t = BtnInfo.Top: w = BtnInfo.Width: H = BtnInfo.Height: l = Me.ScaleWidth - m - w
-    If w > 0 And H > 0 Then BtnInfo.Move l, t, w, H
+    t = BtnInfo.Top: W = BtnInfo.Width: H = BtnInfo.Height: l = Me.ScaleWidth - m - W
+    If W > 0 And H > 0 Then BtnInfo.Move l, t, W, H
     
-    l = Text1.Left: t = Text1.Top: H = Text1.Height: w = Me.ScaleWidth - m - w - l
-    If w > 0 And H > 0 Then Text1.Move l, t, w, H
+    l = Text1.Left: t = Text1.Top: H = Text1.Height: W = Me.ScaleWidth - m - W - l
+    If W > 0 And H > 0 Then Text1.Move l, t, W, H
     
-    t = Text2.Top: w = Me.ScaleWidth - l - m: H = Text2.Height
-    If w > 0 And H > 0 Then Text2.Move l, t, w, H
+    t = Text2.Top: W = Me.ScaleWidth - l - m: H = Text2.Height
+    If W > 0 And H > 0 Then Text2.Move l, t, W, H
     
     t = Text3.Top: H = Text3.Height
-    If w > 0 And H > 0 Then Text3.Move l, t, w, H
+    If W > 0 And H > 0 Then Text3.Move l, t, W, H
     
     t = Text4.Top: H = Text4.Height
-    If w > 0 And H > 0 Then Text4.Move l, t, w, H
+    If W > 0 And H > 0 Then Text4.Move l, t, W, H
     
-    w = Resizer.Width: H = Resizer.Height: l = Me.ScaleWidth - w: t = Me.ScaleHeight - H:
-    If w > 0 And H > 0 Then Resizer.Move l, t, w, H
+    W = Resizer.Width: H = Resizer.Height: l = Me.ScaleWidth - W: t = Me.ScaleHeight - H:
+    If W > 0 And H > 0 Then Resizer.Move l, t, W, H
 End Sub
 
 Function Max(V1, V2)
