@@ -1,6 +1,6 @@
 Attribute VB_Name = "MString"
-Option Explicit 'lines 129; 2022.01.06 lines 336; 2022.11.01 lines 625; 2024-06-24 lines 1595; 2024-07-17 lines 1948; 2024-08-25 lines: 2102; 2025-09-13 lines: 2378;
-'For using this module you also must include:
+Option Explicit 'lines 129; 2022.01.06 lines 336; 2022.11.01 lines 625; 2024-06-24 lines 1595; 2024-07-17 lines 1948; 2024-08-25 lines: 2102; 2025-09-13 lines: 2378; 2025-10-25 lines: 2543;
+'For using this module you have to include:
 '..\Ptr_Pointers\MPtr.bas
 '..\Math\MMath.bas
 
