@@ -114,6 +114,12 @@ Public CurrencySymbol   As String
 Private m_isInitialized As Boolean
 Private m_VBOperators() As String
 
+'for the algo Boyer-Moore-Horspool find a needle in a haystack:
+Private m_Text  As MPtr.TCharPointer
+Private m_Find  As MPtr.TCharPointer
+Private m_Start As Long
+
+
 Public Function Init()
     If Not m_isInitialized Then
         m_VBOperators() = Split(" Or , Xor , And , + , - , * , / ", ",")
@@ -311,17 +317,17 @@ Public Function RecursiveReplace(ByVal Expression As String, ByVal Find As Strin
     End If
 End Function
 
-Public Function RecursiveReplaceSL(ByVal Expression As String, ByVal Find As String, ByVal Replace As String, Optional ByVal Start As Long = 1, Optional ByVal Length As Long = -1) As String
+Public Function RecursiveReplaceSL(ByVal Expression As String, ByVal Find As String, ByVal Replace As String, Optional ByVal start As Long = 1, Optional ByVal Length As Long = -1) As String
     'Uses RecursiveReplace to replace "Find" by "Replace" in a part of "Expression" that starts with "Start" with the length of "Length"
     'check input parameters return early if necessary
-    If Length < 0 And Start = 1 Then RecursiveReplaceSL = RecursiveReplace(Expression, Find, Replace): Exit Function
+    If Length < 0 And start = 1 Then RecursiveReplaceSL = RecursiveReplace(Expression, Find, Replace): Exit Function
     Dim le As Long: le = Len(Expression)
-    If Start < 1 Or le < Start Then Exit Function 'return nothing
-    If Length < 1 Or le < Start + Length Then Length = le - Start + 1
+    If start < 1 Or le < start Then Exit Function 'return nothing
+    If Length < 1 Or le < start + Length Then Length = le - start + 1
     
-    Dim sl As String: sl = Left$(Expression, Start - 1)
-    Dim sm As String: sm = Mid$(Expression, Start, Length)
-    Dim sr As String: sr = Mid$(Expression, Start + Length)
+    Dim sl As String: sl = Left$(Expression, start - 1)
+    Dim sm As String: sm = Mid$(Expression, start, Length)
+    Dim sr As String: sr = Mid$(Expression, start + Length)
     sm = RecursiveReplace(sm, Find, Replace)
     RecursiveReplaceSL = sl & sm & sr
     'same but shorter and less noise:
@@ -793,11 +799,11 @@ End Function
 Public Function HexInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsHexPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsHexPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1)
+        s = Left(s, L - 1)
         If vt <> VbVarType.vbInteger Then Exit Function
     End If
     If Not IsHex(s) Then Exit Function
@@ -809,11 +815,11 @@ End Function
 Public Function HexLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsHexPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsHexPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1)
+        s = Left(s, L - 1)
         If vt <> VbVarType.vbLong Then Exit Function
     End If
     If Not IsHex(s) Then Exit Function
@@ -827,18 +833,18 @@ Public Function Hex_TryParse(ByVal s As String, vtid_out As VbVarType, ByRef Val
     '&H0, &H12, &HABCDEF12, &H12&,
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
+    Dim L As Long: L = Len(s)
     '&HABCDEF12&
     '12345678901
     '
-    If l < 3 Or 11 < l Then Exit Function
+    If L < 3 Or 11 < L Then Exit Function
     If Not IsHexPrefix(s) Then Exit Function
     'there is either % for integer, or & for long or none
-    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, L - 1)
     If Not IsHex(Mid(s, 3)) Then Exit Function
     Dim i As Integer, lng As Long
     If vtid_out = VbVarType.vbEmpty Then
-        If l < 6 Then
+        If L < 6 Then
             'vtid_out
             Value_out = CInt(s)
         Else
@@ -895,11 +901,11 @@ End Function
 Public Function OctInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsOctPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsOctPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1)
+        s = Left(s, L - 1)
         If vt <> VbVarType.vbInteger Then Exit Function
     End If
     If Not IsOct(s) Then Exit Function
@@ -911,11 +917,11 @@ End Function
 Public Function OctLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsOctPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsOctPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1)
+        s = Left(s, L - 1)
         If vt <> VbVarType.vbLong Then Exit Function
     End If
     If Not IsOct(s) Then Exit Function
@@ -929,17 +935,17 @@ Public Function Oct_TryParse(ByVal s As String, vtid_out As VbVarType, Value_out
     '&H0, &H12, &H12345670, &H12&,
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
+    Dim L As Long: L = Len(s)
     '&H12345678&
     '12345678901
     '
-    If l < 3 Or 11 < l Then Exit Function
+    If L < 3 Or 11 < L Then Exit Function
     If Not IsOctPrefix(s) Then Exit Function
     'there is either % for integer, or & for long or none
-    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, L - 1)
     If Not IsOct(Mid(s, 3)) Then Exit Function
     If vtid_out = VbVarType.vbEmpty Then
-        If l < 6 Then
+        If L < 6 Then
             Value_out = CInt(s)
         Else
             Value_out = CLng(s)
@@ -967,22 +973,22 @@ End Function
 Public Function BinInt_TryParse(ByVal s As String, ByRef Value_out As Integer) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsBinPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsBinPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1): l = Len(s)
+        s = Left(s, L - 1): L = Len(s)
         If vt <> VbVarType.vbInteger Then Exit Function
     End If
     If Not IsBin(s) Then Exit Function
-    If 16 < l Then Exit Function
-    Dim i As Long, n As Long: n = MMath.Min(l, 15)
+    If 16 < L Then Exit Function
+    Dim i As Long, n As Long: n = MMath.Min(L, 15)
     Dim v As Integer
     For i = 0 To n - 1
-        If Mid(s, l - i, 1) = "1" Then v = v + 2 ^ i
+        If Mid(s, L - i, 1) = "1" Then v = v + 2 ^ i
     Next
-    If l = 16 Then
-        If Mid(s, l - i, 1) = "1" Then v = v Xor &H8000
+    If L = 16 Then
+        If Mid(s, L - i, 1) = "1" Then v = v Xor &H8000
     End If
     Value_out = v
     BinInt_TryParse = True
@@ -1009,22 +1015,22 @@ End Function
 Public Function BinLng_TryParse(ByVal s As String, ByRef Value_out As Long) As Boolean
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If IsBinPrefix(s) Then s = Mid(s, 3, l - 2): l = Len(s)
+    Dim L As Long: L = Len(s)
+    If IsBinPrefix(s) Then s = Mid(s, 3, L - 2): L = Len(s)
     Dim vt As VbVarType
     If VBTypeIdentifier_TryParse(s, vt) Then
-        s = Left(s, l - 1): l = Len(s)
+        s = Left(s, L - 1): L = Len(s)
         If vt <> VbVarType.vbLong Then Exit Function
     End If
     If Not IsBin(s) Then Exit Function
-    If 32 < l Then Exit Function
-    Dim i As Long, n As Long: n = Min(l, 31)
+    If 32 < L Then Exit Function
+    Dim i As Long, n As Long: n = Min(L, 31)
     Dim v As Long
     For i = 0 To n - 1
-        If Mid(s, l - i, 1) = "1" Then v = v + 2 ^ i
+        If Mid(s, L - i, 1) = "1" Then v = v + 2 ^ i
     Next
-    If l = 32 Then
-        If Mid(s, l - i, 1) = "1" Then v = v Xor &H80000000
+    If L = 32 Then
+        If Mid(s, L - i, 1) = "1" Then v = v Xor &H80000000
     End If
     Value_out = v
     BinLng_TryParse = True
@@ -1053,11 +1059,11 @@ Public Function Bin_TryParse(ByVal s As String, vtid_out As VbVarType, Value_out
     '&B0, &B10, &B1010100110, &B10&,
 Try: On Error GoTo Catch
     s = Trim(s)
-    Dim l As Long: l = Len(s)
-    If l < 3 Or 11 < l Then Exit Function
+    Dim L As Long: L = Len(s)
+    If L < 3 Or 11 < L Then Exit Function
     If Not IsBinPrefix(s) Then Exit Function
     'there is either % for integer, or & for long or none
-    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, l - 1)
+    If VBTypeIdentifier_TryParse(s, vtid_out) Then s = Left(s, L - 1)
     If Not IsBin(Mid(s, 3)) Then Exit Function
     Dim i As Integer, lng As Long
     Bin_TryParse = BinInt_TryParse(s, i)
@@ -1069,7 +1075,7 @@ Try: On Error GoTo Catch
     Bin_TryParse = BinLng_TryParse(s, lng)
     If Bin_TryParse Then
         vtid_out = vtid_out Or vbBin
-        Value_out = l
+        Value_out = L
         Exit Function
     End If
 Catch:
@@ -1665,10 +1671,10 @@ Public Function PadCentered(this As String, ByVal totalWidth As Long, Optional B
     If StringLength > totalWidth Then
         PadCentered = this
     Else
-        Dim l As Long: l = (totalWidth - StringLength) \ 2
+        Dim L As Long: L = (totalWidth - StringLength) \ 2
         Dim r As Long: r = (totalWidth - StringLength) / 2
         If Len(paddingChar) Then
-            PadCentered = String$(l, paddingChar) & this & String$(r, paddingChar)
+            PadCentered = String$(L, paddingChar) & this & String$(r, paddingChar)
         Else
             PadCentered = Space$(totalWidth)
             RSet PadCentered = this & Space$(r)
@@ -1791,7 +1797,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
     'ist startindex 1-basiert?
     'If startIndex = 0 And Count = -1 Then
     'Dim pos As Long: pos = Len(s) - startIndex
-    Dim l As Long: l = Len(s)
+    Dim L As Long: L = Len(s)
     If Count < 0 Then
         If startIndex < 0 Then
             Remove = ""
@@ -1802,11 +1808,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = ""
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left$(s, startIndex)
             Exit Function
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             Exit Function
         End If
@@ -1824,11 +1830,11 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = s
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = s
             Exit Function
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             Exit Function
         End If
@@ -1836,7 +1842,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count < l Then
+    If Count < L Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -1846,22 +1852,22 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < l Then
-            If startIndex + Count < l Then
+        If startIndex < L Then
+            If startIndex + Count < L Then
                 Remove = Left(s, startIndex) & Mid(s, startIndex + Count + 1)
                 Exit Function
             End If
-            If startIndex + Count = l Then
+            If startIndex + Count = L Then
                 Remove = Left(s, startIndex)
                 Exit Function
             End If
-            If l < startIndex + Count Then
+            If L < startIndex + Count Then
                 Remove = Left(s, startIndex)
                 'Error message
                 Exit Function
             End If
         End If
-        If startIndex = l Then
+        If startIndex = L Then
             Remove = s
             'Error message
             Exit Function
@@ -1870,7 +1876,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
         'Error message
         Exit Function
     End If
-    If Count = l Then
+    If Count = L Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -1880,13 +1886,13 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             Remove = "" 'Mid$(s, Count + 1)
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left$(s, startIndex)
             'Error message
             Exit Function
         End If
     End If
-    If l < Count Then
+    If L < Count Then
         If startIndex < 0 Then
             Remove = ""
             'Error message
@@ -1897,7 +1903,7 @@ Public Function Remove(s As String, ByVal startIndex As Long, Optional ByVal Cou
             'Error message
             Exit Function
         End If
-        If startIndex < l Then
+        If startIndex < L Then
             Remove = Left(s, startIndex)
             'Error message
             Exit Function
@@ -1994,11 +2000,11 @@ End Function
 '                                     ' optional gefolgt von          ÿ
 Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOrderMark
     'checks if s starts with any BOM, returns the bom, andalso returns the rest of the string if there is anything left
-    Dim l As Long: l = Len(s)
-    If l < 2 Then Exit Function
+    Dim L As Long: L = Len(s)
+    If L < 2 Then Exit Function
     Dim c1 As Byte: c1 = Asc(Mid(s, 1, 1))
     Dim c2 As Byte: c2 = Asc(Mid(s, 2, 1))
-    If l = 2 Then
+    If L = 2 Then
         Dim ibom As Integer
         ibom = CInt("&H" & Hex2(c2) & Hex2(c1))
         If ibom = EByteOrderMark.bom_UTF_16_BE Or ibom = EByteOrderMark.bom_UTF_16_LE Then
@@ -2007,7 +2013,7 @@ Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOr
     End If
     Dim c3 As Byte, c4 As Byte
     Dim lbom As Long
-    If l > 2 Then
+    If L > 2 Then
         c3 = Asc(Mid(s, 3, 1))
         lbom = CLng("&H" & Hex2(c3) & Hex2(c2) & Hex2(c1))
         If Long_IsBOM(lbom) Then
@@ -2016,7 +2022,7 @@ Public Function IsBOM(ByVal s As String, Optional rest_out As String) As EByteOr
             Exit Function
         End If
     End If
-    If l > 3 Then
+    If L > 3 Then
         c4 = Asc(Mid(s, 4, 1))
         lbom = CLng("&H" & Hex2(c4) & Hex2(c3) & Hex2(c2) & Hex2(c1))
         If Long_IsBOM(lbom) Then
@@ -2271,14 +2277,14 @@ Public Function Base64_DecodeString(Value As String) As String
 End Function
 
 Public Sub Base64_EncodeBytes(Source() As Byte, Result_out() As Byte)
-    Dim l As Long: l = UBound(Source) - LBound(Source) + 1
-    Dim rest As Long: rest = l Mod 3
+    Dim L As Long: L = UBound(Source) - LBound(Source) + 1
+    Dim rest As Long: rest = L Mod 3
     Dim n As Long
     If rest > 0 Then
-        n = ((l \ 3) + 1) * 3
+        n = ((L \ 3) + 1) * 3
         ReDim Preserve Source(0 To n - 1)
     Else
-        n = l
+        n = L
     End If
     
     ReDim Result_out(0 To n * 4 / 3 - 1) As Byte ' Das Ergebnis ist 4/3 mal so lang
@@ -2318,17 +2324,17 @@ End Sub
 
 Public Sub Base64_DecodeBytes(Source() As Byte, Result_out() As Byte)
     
-    Dim l As Long: l = UBound(Source) - LBound(Source) + 1
+    Dim L As Long: L = UBound(Source) - LBound(Source) + 1
     
-    Dim rest As Long: rest = l Mod 4
+    Dim rest As Long: rest = L Mod 4
     If rest > 0 Then ' Falls Textlaenge nicht ein Vielfaches von 4 ist
                      ' Werden einfach ein paar Nullen angehaengt.
-        ReDim Preserve Source(0 To l + 4 - rest)
-        l = UBound(Source) - LBound(Source) + 1
+        ReDim Preserve Source(0 To L + 4 - rest)
+        L = UBound(Source) - LBound(Source) + 1
     End If
     
     ' Der String wird in ein Feld umgewandelt
-    ReDim Result_out(0 To l) As Byte ' Das ist mehr Platz als benoetigt, schadet aber nicht.
+    ReDim Result_out(0 To L) As Byte ' Das ist mehr Platz als benoetigt, schadet aber nicht.
     Dim w1 As Integer, w2 As Integer, w3 As Integer, w4 As Integer
     
     Dim cnt As Long
@@ -2426,10 +2432,10 @@ End Function
 Public Function JSONEscaped_Decode(ByVal Value As String) As String
     Dim ch As String, sHex As String
     Dim cl As Long, pos As Long: pos = 1
-    Dim l As Long: l = LenB(Value)
-    If l = 0 Then Exit Function
+    Dim L As Long: L = LenB(Value)
+    If L = 0 Then Exit Function
     Dim pl As Long, sl As String
-    Do While pos < l
+    Do While pos < L
         pos = InStrB(pos, Value, "\")
         If pos = 0 Then Exit Do
         ch = MidB(Value, pos + 2, 2)
@@ -2465,7 +2471,7 @@ Public Function JSONEscaped_Decode(ByVal Value As String) As String
             End If
             pos = pos + 2
         End Select
-        l = LenB(Value)
+        L = LenB(Value)
     Loop
     JSONEscaped_Decode = Value
 End Function
@@ -2497,10 +2503,10 @@ Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
     'https://de.wikipedia.org/wiki/URL-Encoding
     Dim ch As String, sHex As String
     Dim cl As Long, pos As Long: pos = 1
-    Dim l As Long: l = LenB(Value)
-    If l = 0 Then Exit Function
+    Dim L As Long: L = LenB(Value)
+    If L = 0 Then Exit Function
     Dim pl As Long, sl As String
-    Do While pos < l
+    Do While pos < L
         pos = InStrB(pos, Value, "%")
         If pos = 0 Then Exit Do
         ch = MidB(Value, pos, 2)
@@ -2517,7 +2523,7 @@ Public Function URLEscaped_DecodeFromUTF8(Value As String) As String
             End If
             pos = pos + 2
         End Select
-        l = LenB(Value)
+        L = LenB(Value)
     Loop
     Dim b() As Byte: b = StrConv(Value, vbFromUnicode)
     URLEscaped_DecodeFromUTF8 = MString.ConvertFromUTF8(b)
@@ -2526,18 +2532,173 @@ End Function
 Public Function Encoding_GetString(enc As ETextEncoding, Bytes() As Byte) As String
 Try: On Error GoTo Catch
     Dim n As Long: n = UBound(Bytes) - LBound(Bytes) + 1
-    Dim l As Long: l = CLng(CDbl(n) * 2.2)
-    Encoding_GetString = String(l, vbNullChar)
+    Dim L As Long: L = CLng(CDbl(n) * 2.2)
+    Encoding_GetString = String(L, vbNullChar)
     Dim hr As Long
     Select Case enc
-    Case ETextEncoding.Text_ASCIIEncoding:   hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), l)
+    Case ETextEncoding.Text_ASCIIEncoding:   hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), L)
     Case ETextEncoding.Text_UnicodeEncoding: Encoding_GetString = Bytes 'hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), L)
-    Case ETextEncoding.Text_UTF32Encoding:   hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), l)
-    Case ETextEncoding.Text_UTF7Encoding:    hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), l)
-    Case ETextEncoding.Text_UTF8Encoding:    hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), l)
+    Case ETextEncoding.Text_UTF32Encoding:   hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), L)
+    Case ETextEncoding.Text_UTF7Encoding:    hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), L)
+    Case ETextEncoding.Text_UTF8Encoding:    hr = MultiByteToWideChar(enc, 0, VarPtr(Bytes(0)), n, StrPtr(Encoding_GetString), L)
     End Select
 Catch:
 End Function
 
 ' ^ ' ############################## ' ^ '    Encoding functions    ' ^ ' ############################## ' ^ '
+
+' v ' ############################## ' v '    Boyer, Moore, Horspool finding text    ' v ' ############################## ' v '
+Public Function FindStr(Text As String, FindWhat As String, Optional start As Long = 0) As Long
+    MPtr.New_CharPointer m_Text, Text
+    MPtr.New_CharPointer m_Find, FindWhat
+    FindStr = BMH_Find(m_Text.Chars, m_Find.Chars)
+    m_Start = FindStr + m_Find.pudt.cElements
+End Function
+
+Public Function FindNext() As Long
+    FindNext = BMH_Find(m_Text.Chars, m_Find.Chars, m_Start)
+End Function
+
+Public Sub BMH_Clear()
+    MPtr.DeleteCharPointer m_Text
+    MPtr.DeleteCharPointer m_Find
+End Sub
+
+Private Function BMH_Find(haystack() As Integer, needle() As Integer, Optional start As Long = 0) As Long
+    'Boyer-Moore-Horspool-Algo
+    BMH_Find = -1
+    Dim i_n As Long
+    Dim i_h As Long:    i_h = start
+    Const UCHAR_MAX As Long = 65535 '255
+    Dim bad_char_skip(0 To UCHAR_MAX + 2) As Long
+    On Error GoTo 0
+    Dim ds As String
+    Dim n_h As Long: n_h = UBound(haystack) + 1
+    Dim n_n As Long: n_n = UBound(needle) + 1
+    If n_n > n_h Then Exit Function
+    
+    For i_n = 0 To UCHAR_MAX + 2
+        bad_char_skip(i_n) = n_n
+    Next
+    Dim last As Long: last = n_n - 1
+    For i_n = 0 To last - 1
+        bad_char_skip(needle(i_n)) = last - i_n
+    Next
+    'Dim bcs As Byte, bhs As Byte
+    Dim bcs As Integer, bhs As Integer
+    'Dim bcs As Long, bhs As Long
+    'Dim ds As String 'debugstring
+    'Debug_Print "We search the haystack from the left, but "
+    'Debug_Print "we compare with each character of the needle from the right"
+    While (n_h - start) >= n_n
+        i_n = last
+        While haystack(i_h + i_n) = needle(i_n)
+            i_n = i_n - 1
+            If i_n = 0 Then
+                BMH_Find = i_h
+                Exit Function
+            End If
+        Wend
+        bhs = haystack(i_h + last)
+        ds = """" & Chr(bhs) & """"
+        bcs = bad_char_skip(bhs)
+        If bcs < (last + 1) Then
+            ds = ds & ": we are allowed to skip minimum " & bcs & " characters "
+        Else
+            ds = ds & " is not in the needle so we skip the whole length of the needle: " & bcs
+        End If
+        'Debug_Print ds
+        n_h = n_h - bcs 'bad_char_skip(haystack(i_h + last))
+        i_h = i_h + bcs 'bad_char_skip(haystack(i_h + last))
+        'Debug_Print "n_h: " & n_h & "    i_h: " & i_h & "    bcs: " & bcs
+    Wend
+End Function
+
+'nop
+'Function findX(haystack() As Byte, needle() As Byte, Optional start As Long = 0) As Long
+'    findX = -1
+'    Dim u_h As Long: u_h = UBound(haystack) '+ 1
+'    Dim u_n As Long: u_n = UBound(needle) '+ 1
+'    Dim i_n As Long
+'    Dim i_h As Long: i_h = start
+'    While i_h < (u_h - u_n)
+'        i_n = u_n
+'        While haystack(i_h + i_n) = needle(i_n)
+'            i_n = i_n - 1
+'            If i_n = 0 Then
+'                findX = i_h
+'                Exit Function
+'            End If
+'        Wend
+'        i_h = i_h + u_n + 1
+'    Wend
+'End Function
+'Der Algo läuft ganz gut wenn man eine Nadel und einen Heuhaufen als eine Bytefolge vorliegen hat.
+'Der Algo legt ein Feld an, der Größe UCHAR_MAX.
+'Die meisten Beispiele die man zu dem Algo findet hantieren mit Strings weil es sehr anschaulich wirkt.
+'Zu Zeiten von 16-bit-Windows war das OK, Strings waren damals noch wirklich Bytefolgen.
+'Heute ist Unicode, und wir haben gelernt daß die Größe eines Characters nicht festgelegt ist.
+'wie soll man ein skip-Array anlegen wenn man die Größe eines Zeichens nicht kennt?
+'Ist das nicht eine Katastrophe für den Algo?
+'man muß ein Feld anlegen das einen Wert für jedes Byte speichert der Größe UCHAR_MAX
+'man kann jetzt damit argumentieren, daß jeder String auch als Stream von Bytes betrachtet werden kann.
+'OK, aber je nach Encoding hat der Algo eine sehr viel schlechtere Laufzeit.
+'wenn bspw mit UTF16 oder UCS nahezu jedes zweite Byte eine 0 ist, dann dürfen immer nur maximal 2 Bytes geskippt werden.
+'
+'
+'code aus wikipedia
+'boyermoore_horspool_memmem(const unsigned char* haystack, ssize_t hlen,
+'                           const unsigned char* needle,   ssize_t nlen)
+'{
+'    size_t scan = 0;
+'    size_t bad_char_skip[UCHAR_MAX + 1]; /* Officially called:
+'                                          * bad character shift */
+'
+'    /* Sanity checks on the parameters */
+'    if (nlen <= 0 || !haystack || !needle)
+'        return NULL;
+'
+'    /* ---- Preprocess ---- */
+'    /* Initialize the table to default value */
+'    /* When a character is encountered that does not occur
+'     * in the needle, we can safely skip ahead for the whole
+'     * length of the needle.
+'     */
+'    for (scan = 0; scan <= UCHAR_MAX; scan = scan + 1)
+'        bad_char_skip[scan] = nlen;
+'
+'    /* C arrays have the first byte at [0], therefore:
+'     * [nlen - 1] is the last byte of the array. */
+'    size_t last = nlen - 1;
+'
+'    /* Then populate it with the analysis of the needle */
+'    for (scan = 0; scan < last; scan = scan + 1)
+'        bad_char_skip[needle[scan]] = last - scan;
+'
+'    /* ---- Do the matching ---- */
+'
+'    /* Search the haystack, while the needle can still be within it. */
+'    While (hlen >= nlen)
+'    {
+'        /* scan from the end of the needle */
+'        for (scan = last; haystack[scan] == needle[scan]; scan = scan - 1)
+'            if (scan == 0) /* If the first byte matches, we've found it. */
+'                return haystack;
+'
+'        /* otherwise, we need to skip some bytes and start again.
+'           Note that here we are getting the skip value based on the last byte
+'           of needle, no matter where we didn't match. So if needle is: "abcd"
+'           then we are skipping based on 'd' and that value will be 4, and
+'           for "abcdd" we again skip on 'd' but the value will be only 1.
+'           The alternative of pretending that the mismatched character was
+'           the last character is slower in the normal case (Eg. finding
+'           "abcd" in "...azcd..." gives 4 by using 'd' but only
+'           4-2==2 using 'z'. */
+'        hlen     -= bad_char_skip[haystack[last]];
+'        haystack += bad_char_skip[haystack[last]];
+'    }
+'
+'    return NULL;
+'}
+' ^ ' ############################## ' ^ '    Boyer, Moore, Horspool finding text    ' ^ ' ############################## ' ^ '
 
