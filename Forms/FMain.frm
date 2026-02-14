@@ -1,13 +1,13 @@
 VERSION 5.00
 Begin VB.Form FMain 
    Caption         =   "SysStrings"
-   ClientHeight    =   9495
+   ClientHeight    =   8145
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   15375
+   ClientWidth     =   15255
    BeginProperty Font 
-      Name            =   "Tahoma"
-      Size            =   9
+      Name            =   "Segoe UI"
+      Size            =   9.75
       Charset         =   0
       Weight          =   400
       Underline       =   0   'False
@@ -16,40 +16,40 @@ Begin VB.Form FMain
    EndProperty
    Icon            =   "FMain.frx":0000
    LinkTopic       =   "FMain"
-   ScaleHeight     =   9495
-   ScaleWidth      =   15375
+   ScaleHeight     =   8145
+   ScaleWidth      =   15255
    StartUpPosition =   3  'Windows-Standard
    Begin VB.CommandButton BtnTestBMHniths 
       Caption         =   "Test BMH"
       Height          =   375
-      Left            =   10440
+      Left            =   11760
       TabIndex        =   35
       Top             =   480
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.CommandButton BtnTestTryParseValidate 
       Caption         =   "Test TryParseValidate"
       Height          =   375
-      Left            =   8520
+      Left            =   9600
       TabIndex        =   34
       Top             =   480
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.CommandButton BtnTestEncodings 
       Caption         =   "Test Encodings"
       Height          =   375
-      Left            =   6600
+      Left            =   7440
       TabIndex        =   33
       Top             =   480
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.CommandButton BtnTestTryParse 
       Caption         =   "Test TryParse"
       Height          =   375
-      Left            =   4680
+      Left            =   5280
       TabIndex        =   32
       Top             =   480
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.CommandButton BtnPadCentered 
       Caption         =   "PadCentered"
@@ -77,7 +77,7 @@ Begin VB.Form FMain
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   2835
+      Height          =   3315
       Left            =   12840
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
@@ -88,10 +88,10 @@ Begin VB.Form FMain
    Begin VB.CommandButton BtnTestByteOrderMark 
       Caption         =   "Test ByteOrderMark"
       Height          =   375
-      Left            =   2760
+      Left            =   3120
       TabIndex        =   28
       Top             =   480
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.CommandButton Command1 
       Caption         =   "Some Tests"
@@ -99,7 +99,7 @@ Begin VB.Form FMain
       Left            =   0
       TabIndex        =   27
       Top             =   1920
-      Width           =   1215
+      Width           =   1335
    End
    Begin VB.TextBox Resizer 
       BorderStyle     =   0  'Kein
@@ -113,17 +113,17 @@ Begin VB.Form FMain
          Strikethrough   =   0   'False
       EndProperty
       Height          =   255
-      Left            =   13200
+      Left            =   14760
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   26
-      Top             =   7800
+      Top             =   3720
       Width           =   255
    End
    Begin VB.CommandButton BtnReplaceX 
       Caption         =   "Replace "" ."" -> ""."""
       Height          =   375
-      Left            =   840
+      Left            =   1320
       TabIndex        =   25
       Top             =   480
       Width           =   1815
@@ -146,7 +146,7 @@ Begin VB.Form FMain
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   2835
+      Height          =   3315
       Left            =   9000
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
@@ -173,7 +173,7 @@ Begin VB.Form FMain
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   2835
+      Height          =   3315
       Left            =   5160
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
@@ -207,7 +207,7 @@ Begin VB.Form FMain
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   2835
+      Height          =   3315
       Left            =   1320
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
@@ -218,23 +218,23 @@ Begin VB.Form FMain
    Begin VB.CommandButton BtnPadLeft 
       Caption         =   "PadLeft"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   17
       Top             =   5160
-      Width           =   1215
+      Width           =   1335
    End
    Begin VB.CommandButton BtnResetPadLeft 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   18
       Top             =   4800
-      Width           =   1215
+      Width           =   1335
    End
    Begin VB.CommandButton BtnInfo 
       Caption         =   "Info"
       Height          =   375
-      Left            =   12360
+      Left            =   13920
       TabIndex        =   15
       Top             =   120
       Width           =   975
@@ -250,44 +250,44 @@ Begin VB.Form FMain
          Strikethrough   =   0   'False
       EndProperty
       Height          =   795
-      Left            =   2760
+      Left            =   3120
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   12
       Top             =   3840
-      Width           =   10575
+      Width           =   10815
    End
    Begin VB.CommandButton BtnDeleteMultiWS4 
       Caption         =   "DeleteMultiWS"
       Height          =   375
-      Left            =   1080
+      Left            =   1320
       TabIndex        =   11
       Top             =   4200
-      Width           =   1575
+      Width           =   1815
    End
    Begin VB.CommandButton BtnRecursiveReplace 
       Caption         =   "RecursiveReplace"
       Height          =   375
-      Left            =   1080
+      Left            =   1320
       TabIndex        =   13
       Top             =   3840
-      Width           =   1575
+      Width           =   1815
    End
    Begin VB.CommandButton BtnResetRecursiveReplace 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   14
       Top             =   3840
-      Width           =   975
+      Width           =   1335
    End
    Begin VB.CommandButton BtnDeleteMultiWS3 
       Caption         =   "DeleteMultiWS"
       Height          =   375
-      Left            =   1080
+      Left            =   1320
       TabIndex        =   10
       Top             =   3240
-      Width           =   1575
+      Width           =   1815
    End
    Begin VB.TextBox Text3 
       BeginProperty Font 
@@ -300,36 +300,36 @@ Begin VB.Form FMain
          Strikethrough   =   0   'False
       EndProperty
       Height          =   795
-      Left            =   2760
+      Left            =   3120
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   7
       Top             =   2880
-      Width           =   10575
+      Width           =   10815
    End
    Begin VB.CommandButton BtnRemoveChars 
       Caption         =   "RemoveChars"
       Height          =   375
-      Left            =   1080
+      Left            =   1320
       TabIndex        =   8
       Top             =   2880
-      Width           =   1575
+      Width           =   1815
    End
    Begin VB.CommandButton BtnResetRemoveChars 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   9
       Top             =   2880
-      Width           =   975
+      Width           =   1335
    End
    Begin VB.CommandButton BtnDeleteMultiWS2 
       Caption         =   "DeleteMultiWS"
       Height          =   375
-      Left            =   1080
+      Left            =   1320
       TabIndex        =   6
       Top             =   1320
-      Width           =   1575
+      Width           =   1815
    End
    Begin VB.TextBox Text2 
       BeginProperty Font 
@@ -342,28 +342,28 @@ Begin VB.Form FMain
          Strikethrough   =   0   'False
       EndProperty
       Height          =   1815
-      Left            =   2760
+      Left            =   3120
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   5
       Top             =   960
-      Width           =   10575
+      Width           =   10815
    End
    Begin VB.CommandButton BtnDeleteCRLF 
       Caption         =   "DeleteCRLF"
       Height          =   375
-      Left            =   1080
+      Left            =   1320
       TabIndex        =   4
       Top             =   960
-      Width           =   1575
+      Width           =   1815
    End
    Begin VB.CommandButton BtnResetDeleteCRLF 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   3
       Top             =   960
-      Width           =   975
+      Width           =   1335
    End
    Begin VB.TextBox Text1 
       BeginProperty Font 
@@ -376,26 +376,26 @@ Begin VB.Form FMain
          Strikethrough   =   0   'False
       EndProperty
       Height          =   315
-      Left            =   2760
+      Left            =   3120
       TabIndex        =   0
       Top             =   120
-      Width           =   9615
+      Width           =   10815
    End
    Begin VB.CommandButton BtnDeleteMultiWS 
       Caption         =   "DeleteMultiWS"
       Height          =   375
-      Left            =   1080
+      Left            =   1320
       TabIndex        =   1
       Top             =   120
-      Width           =   1575
+      Width           =   1815
    End
    Begin VB.CommandButton BtnResetDeleteMultiWS 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   2
       Top             =   120
-      Width           =   975
+      Width           =   1335
    End
 End
 Attribute VB_Name = "FMain"

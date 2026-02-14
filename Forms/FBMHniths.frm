@@ -5,6 +5,15 @@ Begin VB.Form FBMHniths
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   10095
+   BeginProperty Font 
+      Name            =   "Segoe UI"
+      Size            =   9.75
+      Charset         =   0
+      Weight          =   400
+      Underline       =   0   'False
+      Italic          =   0   'False
+      Strikethrough   =   0   'False
+   EndProperty
    LinkTopic       =   "Form1"
    ScaleHeight     =   6375
    ScaleWidth      =   10095
@@ -12,18 +21,18 @@ Begin VB.Form FBMHniths
    Begin VB.CommandButton BtnReset 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   7920
+      Left            =   9120
       TabIndex        =   2
       Top             =   120
       Width           =   855
    End
    Begin VB.CommandButton Command1 
-      Caption         =   "Test of searching for the needle in the haystack with an algorithm by Boyer, Moore and Horspool (W)"
+      Caption         =   "Test of searching for the needle in the haystack with the Boyer-Moore-Horspool algorithm (W)"
       Height          =   375
       Left            =   120
       TabIndex        =   1
       Top             =   120
-      Width           =   7695
+      Width           =   8895
    End
    Begin VB.TextBox Text1 
       BeginProperty Font 
@@ -71,8 +80,11 @@ Private Sub Command1_Click()
     Debug_Print m_Haystack
     Debug_Print m_Needle
     If m_Start = 0 Then
-        m_Start = MString.FindStr(m_Haystack, m_Needle)
+        'm_Start = MString.FindBMH(m_Haystack, m_Needle)
+        m_Start = MString.Find(m_Haystack, m_Needle, m_Start)
     Else
+        'm_Start = MString.Find(m_Haystack, m_Needle, m_Start + 1)
+        'm_Start = MString.FindNextBMH
         m_Start = MString.FindNext
     End If
     Debug_Print "pos: " & m_Start
@@ -87,6 +99,6 @@ Private Sub Form_Resize()
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
-    MString.BMH_Clear
+    MString.ClearFind
 End Sub
 

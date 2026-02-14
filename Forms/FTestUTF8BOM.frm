@@ -5,16 +5,25 @@ Begin VB.Form FTestUTF8BOM
    ClientLeft      =   19155
    ClientTop       =   3090
    ClientWidth     =   11400
+   BeginProperty Font 
+      Name            =   "Segoe UI"
+      Size            =   9.75
+      Charset         =   0
+      Weight          =   400
+      Underline       =   0   'False
+      Italic          =   0   'False
+      Strikethrough   =   0   'False
+   EndProperty
    LinkTopic       =   "Form2"
    ScaleHeight     =   4395
    ScaleWidth      =   11400
    Begin VB.CommandButton Command1 
       Caption         =   "StringAnsiWin1252"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   9
       Top             =   120
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.TextBox Text1 
       Height          =   375
@@ -40,18 +49,18 @@ Begin VB.Form FTestUTF8BOM
    Begin VB.CommandButton Command5 
       Caption         =   "StringUTF16LE_bom"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   5
       Top             =   2040
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.CommandButton Command4 
       Caption         =   "StringUTF16BE_bom"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   4
       Top             =   1560
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.TextBox Text3 
       Height          =   375
@@ -70,18 +79,18 @@ Begin VB.Form FTestUTF8BOM
    Begin VB.CommandButton Command3 
       Caption         =   "StringUTF8_bom"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   1
       Top             =   1080
-      Width           =   1935
+      Width           =   2175
    End
    Begin VB.CommandButton Command2 
       Caption         =   "StringUTF8"
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   0
       Top             =   600
-      Width           =   1935
+      Width           =   2175
    End
 End
 Attribute VB_Name = "FTestUTF8BOM"
@@ -102,7 +111,7 @@ Private Sub Command1_Click()
 '        Dim buffer() As Byte: buffer = s
 '        s = MString.ConvertFromUTF8(buffer)
 '    End If
-    Text1.text = s
+    Text1.Text = s
 End Sub
 
 Private Sub Command2_Click()
@@ -113,24 +122,24 @@ Private Sub Command2_Click()
         Dim buffer() As Byte: buffer = s
         s = MString.ConvertFromUTF8(buffer)
     End If
-    Text2.text = s
+    Text2.Text = s
 End Sub
 
 Private Sub Command3_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF8_bom.txt"
     Dim s As String: s = FileReadAllString(FNm)
-    Text3.text = s
+    Text3.Text = s
 End Sub
 
 Private Sub Command4_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF16BE_bom.txt"
-    Text4.text = FileReadAllString(FNm)
+    Text4.Text = FileReadAllString(FNm)
 End Sub
 
 Private Sub Command5_Click()
     Dim FNm As String:  FNm = App.Path & "\StringUTF16LE_bom.txt"
     Dim s As String: s = FileReadAllString(FNm)
-    Text5.text = s
+    Text5.Text = s
 End Sub
 
 Function FileReadAllString(FNm As String) As String

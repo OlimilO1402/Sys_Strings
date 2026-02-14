@@ -115,9 +115,11 @@ Private m_isInitialized As Boolean
 Private m_VBOperators() As String
 
 'for the algo Boyer-Moore-Horspool find a needle in a haystack:
-Private m_Text  As MPtr.TCharPointer
-Private m_Find  As MPtr.TCharPointer
-Private m_Start As Long
+Private m_TextBMH As MPtr.TCharPointer
+Private m_FindBMH As MPtr.TCharPointer
+Private m_Start   As Long
+Private m_TextI   As String
+Private m_FindI   As String
 
 
 Public Function Init()
@@ -317,17 +319,17 @@ Public Function RecursiveReplace(ByVal Expression As String, ByVal Find As Strin
     End If
 End Function
 
-Public Function RecursiveReplaceSL(ByVal Expression As String, ByVal Find As String, ByVal Replace As String, Optional ByVal start As Long = 1, Optional ByVal Length As Long = -1) As String
+Public Function RecursiveReplaceSL(ByVal Expression As String, ByVal Find As String, ByVal Replace As String, Optional ByVal Start As Long = 1, Optional ByVal Length As Long = -1) As String
     'Uses RecursiveReplace to replace "Find" by "Replace" in a part of "Expression" that starts with "Start" with the length of "Length"
     'check input parameters return early if necessary
-    If Length < 0 And start = 1 Then RecursiveReplaceSL = RecursiveReplace(Expression, Find, Replace): Exit Function
+    If Length < 0 And Start = 1 Then RecursiveReplaceSL = RecursiveReplace(Expression, Find, Replace): Exit Function
     Dim le As Long: le = Len(Expression)
-    If start < 1 Or le < start Then Exit Function 'return nothing
-    If Length < 1 Or le < start + Length Then Length = le - start + 1
+    If Start < 1 Or le < Start Then Exit Function 'return nothing
+    If Length < 1 Or le < Start + Length Then Length = le - Start + 1
     
-    Dim sl As String: sl = Left$(Expression, start - 1)
-    Dim sm As String: sm = Mid$(Expression, start, Length)
-    Dim sr As String: sr = Mid$(Expression, start + Length)
+    Dim sl As String: sl = Left$(Expression, Start - 1)
+    Dim sm As String: sm = Mid$(Expression, Start, Length)
+    Dim sr As String: sr = Mid$(Expression, Start + Length)
     sm = RecursiveReplace(sm, Find, Replace)
     RecursiveReplaceSL = sl & sm & sr
     'same but shorter and less noise:
@@ -2548,27 +2550,54 @@ End Function
 ' ^ ' ############################## ' ^ '    Encoding functions    ' ^ ' ############################## ' ^ '
 
 ' v ' ############################## ' v '    Boyer, Moore, Horspool finding text    ' v ' ############################## ' v '
-Public Function FindStr(Text As String, FindWhat As String, Optional start As Long = 0) As Long
-    MPtr.New_CharPointer m_Text, Text
-    MPtr.New_CharPointer m_Find, FindWhat
-    FindStr = BMH_Find(m_Text.Chars, m_Find.Chars)
-    m_Start = FindStr + m_Find.pudt.cElements
+Public Function Find(Text As String, FindWhat As String, Optional Start As Long = 0) As Long
+    If Len(Text) < 100 Then
+        m_TextI = Text
+        m_FindI = FindWhat
+        m_Start = Start
+        Find = InStr(m_Start + 1, m_TextI, m_FindI) '- 1
+        m_Start = Find
+        If Find > 0 Then Find = Find - 1
+    Else
+        Find = FindBMH(Text, FindWhat, Start)
+    End If
 End Function
 
 Public Function FindNext() As Long
-    FindNext = BMH_Find(m_Text.Chars, m_Find.Chars, m_Start)
+    If Len(m_TextI) < 100 Then
+        m_Start = m_Start + 1
+        FindNext = InStr(m_Start, m_TextI, m_FindI)
+        m_Start = FindNext
+        If FindNext > 0 Then FindNext = FindNext - 1
+    Else
+        FindNext = FindNextBMH
+    End If
 End Function
 
-Public Sub BMH_Clear()
-    MPtr.DeleteCharPointer m_Text
-    MPtr.DeleteCharPointer m_Find
+Public Function FindBMH(Text As String, FindWhat As String, Optional Start As Long = 0) As Long
+    MPtr.New_CharPointer m_TextBMH, Text
+    MPtr.New_CharPointer m_FindBMH, FindWhat
+    FindBMH = BMH_Find(m_TextBMH.Chars, m_FindBMH.Chars)
+    m_Start = FindBMH + m_FindBMH.pudt.cElements
+End Function
+
+Public Function FindNextBMH() As Long
+    FindNextBMH = BMH_Find(m_TextBMH.Chars, m_FindBMH.Chars, m_Start)
+End Function
+
+Public Sub ClearFind()
+    m_TextI = vbNullString
+    m_FindI = vbNullString
+    m_Start = 0
+    MPtr.DeleteCharPointer m_TextBMH
+    MPtr.DeleteCharPointer m_FindBMH
 End Sub
 
-Private Function BMH_Find(haystack() As Integer, needle() As Integer, Optional start As Long = 0) As Long
-    'Boyer-Moore-Horspool-Algo
+Private Function BMH_Find(haystack() As Integer, needle() As Integer, Optional Start As Long = 0) As Long
+    'Boyer-Moore-Horspool algorithm
     BMH_Find = -1
     Dim i_n As Long
-    Dim i_h As Long:    i_h = start
+    Dim i_h As Long:    i_h = Start
     Const UCHAR_MAX As Long = 65535 '255
     Dim bad_char_skip(0 To UCHAR_MAX + 2) As Long
     On Error GoTo 0
@@ -2584,13 +2613,12 @@ Private Function BMH_Find(haystack() As Integer, needle() As Integer, Optional s
     For i_n = 0 To last - 1
         bad_char_skip(needle(i_n)) = last - i_n
     Next
-    'Dim bcs As Byte, bhs As Byte
     Dim bcs As Integer, bhs As Integer
     'Dim bcs As Long, bhs As Long
     'Dim ds As String 'debugstring
     'Debug_Print "We search the haystack from the left, but "
     'Debug_Print "we compare with each character of the needle from the right"
-    While (n_h - start) >= n_n
+    While (n_h - Start) >= n_n
         i_n = last
         While haystack(i_h + i_n) = needle(i_n)
             i_n = i_n - 1
