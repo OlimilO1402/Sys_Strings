@@ -1,5 +1,5 @@
 Attribute VB_Name = "MString"
-Option Explicit 'lines 129; 2022.01.06 lines 336; 2022.11.01 lines 625; 2024-06-24 lines 1595; 2024-07-17 lines 1948; 2024-08-25 lines: 2102; 2025-09-13 lines: 2378; 2025-10-25 lines: 2543;
+Option Explicit 'lines 129; 2022.01.06 lines 336; 2022.11.01 lines 625; 2024-06-24 lines 1595; 2024-07-17 lines 1948; 2024-08-25 lines: 2102; 2025-09-13 lines: 2378; 2025-10-25 lines: 2543; 2026-02-15 lines: 2730;
 'For using this module you have to include:
 '..\Ptr_Pointers\MPtr.bas
 '..\Math\MMath.bas
@@ -1123,6 +1123,7 @@ Public Function VBVarType_TryParse(ByVal s As String, vt_out As VbVarType) As Bo
     Select Case s
     Case "INTEGER":         vt_out = VbVarType.vbInteger
     Case "LONG":            vt_out = VbVarType.vbLong
+    Case "LONGLONG":        vt_out = 20 'VbVarType.vbLongLong
     Case "SINGLE":          vt_out = VbVarType.vbSingle
     Case "DOUBLE":          vt_out = VbVarType.vbDouble
     Case "CURRENCY":        vt_out = VbVarType.vbCurrency
@@ -1204,6 +1205,7 @@ End Function
 'vbDataObject      = 13
 'vbDecimal         = 14
 'vbByte            = 17 (&H11)
+'vbLongLong        = 20
 'vbUserDefinedType = 36 (&H24)
 'vbArray           = 8192 (&H2000)
 'vbHex             = &H10000
@@ -2550,23 +2552,20 @@ End Function
 ' ^ ' ############################## ' ^ '    Encoding functions    ' ^ ' ############################## ' ^ '
 
 ' v ' ############################## ' v '    Boyer, Moore, Horspool finding text    ' v ' ############################## ' v '
-Public Function Find(Text As String, FindWhat As String, Optional Start As Long = 0) As Long
-    If Len(Text) < 100 Then
-        m_TextI = Text
-        m_FindI = FindWhat
-        m_Start = Start
-        Find = InStr(m_Start + 1, m_TextI, m_FindI) '- 1
+Public Function Find(text As String, FindWhat As String, Optional Start As Long = 0) As Long
+    If Len(text) < 100 Then
+        m_TextI = text: m_FindI = FindWhat: m_Start = Start
+        Find = InStr(m_Start + 1, m_TextI, m_FindI)
         m_Start = Find
         If Find > 0 Then Find = Find - 1
     Else
-        Find = FindBMH(Text, FindWhat, Start)
+        Find = FindBMH(text, FindWhat, Start)
     End If
 End Function
 
 Public Function FindNext() As Long
     If Len(m_TextI) < 100 Then
-        m_Start = m_Start + 1
-        FindNext = InStr(m_Start, m_TextI, m_FindI)
+        FindNext = InStr(m_Start + 1, m_TextI, m_FindI)
         m_Start = FindNext
         If FindNext > 0 Then FindNext = FindNext - 1
     Else
@@ -2574,8 +2573,8 @@ Public Function FindNext() As Long
     End If
 End Function
 
-Public Function FindBMH(Text As String, FindWhat As String, Optional Start As Long = 0) As Long
-    MPtr.New_CharPointer m_TextBMH, Text
+Public Function FindBMH(text As String, FindWhat As String, Optional Start As Long = 0) As Long
+    MPtr.New_CharPointer m_TextBMH, text
     MPtr.New_CharPointer m_FindBMH, FindWhat
     FindBMH = BMH_Find(m_TextBMH.Chars, m_FindBMH.Chars)
     m_Start = FindBMH + m_FindBMH.pudt.cElements
@@ -2729,4 +2728,3 @@ End Function
 '    return NULL;
 '}
 ' ^ ' ############################## ' ^ '    Boyer, Moore, Horspool finding text    ' ^ ' ############################## ' ^ '
-
