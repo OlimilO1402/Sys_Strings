@@ -4,7 +4,7 @@ Begin VB.Form FMain
    ClientHeight    =   8145
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   19665
+   ClientWidth     =   15855
    BeginProperty Font 
       Name            =   "Segoe UI"
       Size            =   9.75
@@ -17,7 +17,7 @@ Begin VB.Form FMain
    Icon            =   "FMain.frx":0000
    LinkTopic       =   "FMain"
    ScaleHeight     =   8145
-   ScaleWidth      =   19665
+   ScaleWidth      =   15855
    StartUpPosition =   3  'Windows-Standard
    Begin VB.CommandButton BtnTestBMHniths 
       Caption         =   "Test BMH"
@@ -234,7 +234,7 @@ Begin VB.Form FMain
    Begin VB.CommandButton BtnInfo 
       Caption         =   "Info"
       Height          =   375
-      Left            =   13920
+      Left            =   14760
       TabIndex        =   15
       Top             =   120
       Width           =   975
@@ -255,7 +255,7 @@ Begin VB.Form FMain
       ScrollBars      =   3  'Beides
       TabIndex        =   12
       Top             =   3840
-      Width           =   10815
+      Width           =   12615
    End
    Begin VB.CommandButton BtnDeleteMultiWS4 
       Caption         =   "DeleteMultiWS"
@@ -305,7 +305,7 @@ Begin VB.Form FMain
       ScrollBars      =   3  'Beides
       TabIndex        =   7
       Top             =   2880
-      Width           =   10815
+      Width           =   12615
    End
    Begin VB.CommandButton BtnRemoveChars 
       Caption         =   "RemoveChars"
@@ -347,7 +347,7 @@ Begin VB.Form FMain
       ScrollBars      =   3  'Beides
       TabIndex        =   5
       Top             =   960
-      Width           =   10815
+      Width           =   12615
    End
    Begin VB.CommandButton BtnDeleteCRLF 
       Caption         =   "DeleteCRLF"
@@ -379,7 +379,7 @@ Begin VB.Form FMain
       Left            =   3120
       TabIndex        =   0
       Top             =   120
-      Width           =   10815
+      Width           =   11655
    End
    Begin VB.CommandButton BtnDeleteMultiWS 
       Caption         =   "DeleteMultiWS"
@@ -596,9 +596,9 @@ Private Sub Form_Resize()
     If W > 0 And H > 0 Then Resizer.Move L, t, W, H
 End Sub
 
-Function Max(V1, V2)
-    If V1 > V2 Then Max = V1 Else Max = V2
-End Function
+'Function Max(V1, V2)
+'    If V1 > V2 Then Max = V1 Else Max = V2
+'End Function
 
 Private Sub BtnInfo_Click()
     MsgBox App.CompanyName & " " & App.EXEName & " v" & App.Major & "." & App.Minor & "." & App.Revision & vbCrLf & App.FileDescription
