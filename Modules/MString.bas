@@ -1719,10 +1719,31 @@ Function PadRight(this As String, ByVal totalWidth As Long, Optional ByVal paddi
     End If
 End Function
 
+Public Sub GetMaxLenLeftRight(Numbers() As String, maxLenLeft_out As Long, maxLenRight_out As Long, Optional ByVal DecSeparator As String = "")
+    If Len(DecSeparator) = 0 Then DecSeparator = GetDecimalSeparator
+    Dim i As Long, maxlen1 As Long, maxlen2 As Long
+    For i = 0 To UBound(Numbers)
+        Dim sx() As String: sx = Split(Numbers(i), DecSeparator)
+        Dim u As Long: u = UBound(sx)
+        maxlen1 = Max(maxlen1, Len(sx(0)))
+        If u > 0 Then maxlen2 = Max(maxlen2, Len(sx(1)))
+    Next
+    maxLenLeft_out = maxlen1
+    maxLenRight_out = maxlen2
+End Sub
+
 Function PadLeftRightDecSep(this As String, ByVal totalWidthLeft As Long, ByVal totalWidthRight As Long, Optional ByVal DecimalSep As String = "", Optional ByVal paddingChar As String) As String
     If Len(DecimalSep) = 0 Then DecimalSep = GetDecimalSeparator
     Dim sx() As String: sx = Split(this, DecimalSep)
-    PadLeftRightDecSep = MString.PadLeft(sx(0), totalWidthLeft, paddingChar) & DecimalSep & MString.PadRight(sx(1), totalWidthRight, paddingChar)
+    Dim s As String, u As Long: u = UBound(sx)
+    If Len(paddingChar) = 0 Then paddingChar = " "
+    s = MString.PadLeft(sx(0), totalWidthLeft, paddingChar)
+    If u = 0 Then
+        s = s & String(totalWidthRight + 1, paddingChar)
+    Else
+        s = s & DecimalSep & MString.PadRight(sx(1), totalWidthRight, paddingChar)
+    End If
+    PadLeftRightDecSep = s
 End Function
 
 'Public Function PadLeft2(StrVal As String, _

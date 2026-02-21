@@ -4,7 +4,7 @@ Begin VB.Form FMain
    ClientHeight    =   8145
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   15255
+   ClientWidth     =   19665
    BeginProperty Font 
       Name            =   "Segoe UI"
       Size            =   9.75
@@ -17,7 +17,7 @@ Begin VB.Form FMain
    Icon            =   "FMain.frx":0000
    LinkTopic       =   "FMain"
    ScaleHeight     =   8145
-   ScaleWidth      =   15255
+   ScaleWidth      =   19665
    StartUpPosition =   3  'Windows-Standard
    Begin VB.CommandButton BtnTestBMHniths 
       Caption         =   "Test BMH"
@@ -54,7 +54,7 @@ Begin VB.Form FMain
    Begin VB.CommandButton BtnPadCentered 
       Caption         =   "PadCentered"
       Height          =   375
-      Left            =   11520
+      Left            =   11880
       TabIndex        =   29
       Top             =   5160
       Width           =   1335
@@ -62,7 +62,7 @@ Begin VB.Form FMain
    Begin VB.CommandButton BtnResetPadCentered 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   11520
+      Left            =   11880
       TabIndex        =   31
       Top             =   4800
       Width           =   1335
@@ -78,12 +78,12 @@ Begin VB.Form FMain
          Strikethrough   =   0   'False
       EndProperty
       Height          =   3315
-      Left            =   12840
+      Left            =   13200
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   30
       Top             =   4800
-      Width           =   2415
+      Width           =   2655
    End
    Begin VB.CommandButton BtnTestByteOrderMark 
       Caption         =   "Test ByteOrderMark"
@@ -131,7 +131,7 @@ Begin VB.Form FMain
    Begin VB.CommandButton BtnPadLeftRight 
       Caption         =   "PadLeftRight"
       Height          =   375
-      Left            =   7680
+      Left            =   7920
       TabIndex        =   22
       Top             =   5160
       Width           =   1335
@@ -147,17 +147,17 @@ Begin VB.Form FMain
          Strikethrough   =   0   'False
       EndProperty
       Height          =   3315
-      Left            =   9000
+      Left            =   9240
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   24
       Top             =   4800
-      Width           =   2415
+      Width           =   2655
    End
    Begin VB.CommandButton BtnResetPadLeftRight 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   7680
+      Left            =   7920
       TabIndex        =   23
       Top             =   4800
       Width           =   1335
@@ -174,17 +174,17 @@ Begin VB.Form FMain
          Strikethrough   =   0   'False
       EndProperty
       Height          =   3315
-      Left            =   5160
+      Left            =   5280
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
       TabIndex        =   19
       Top             =   4800
-      Width           =   2415
+      Width           =   2655
    End
    Begin VB.CommandButton BtnPadRight 
       Caption         =   "PadRight"
       Height          =   375
-      Left            =   3840
+      Left            =   3960
       TabIndex        =   20
       Top             =   5160
       Width           =   1335
@@ -192,7 +192,7 @@ Begin VB.Form FMain
    Begin VB.CommandButton BtnResetPadRight 
       Caption         =   "Reset"
       Height          =   375
-      Left            =   3840
+      Left            =   3960
       TabIndex        =   21
       Top             =   4800
       Width           =   1335
@@ -213,7 +213,7 @@ Begin VB.Form FMain
       ScrollBars      =   3  'Beides
       TabIndex        =   16
       Top             =   4800
-      Width           =   2415
+      Width           =   2655
    End
    Begin VB.CommandButton BtnPadLeft 
       Caption         =   "PadLeft"
@@ -732,12 +732,9 @@ End Sub
 Private Sub BtnPadLeftRight_Click()
     Dim sa() As String: sa = Split(Text7.text, vbCrLf)
     Dim ds As String: ds = GetDecimalSeparator
-    Dim i As Long, maxlen1 As Long, maxlen2 As Long
-    For i = 0 To UBound(sa)
-        Dim sx() As String: sx = Split(sa(i), ds)
-        maxlen1 = Max(maxlen1, Len(sx(0)))
-        maxlen2 = Max(maxlen2, Len(sx(1)))
-    Next
+    Dim maxlen1 As Long, maxlen2 As Long
+    MString.GetMaxLenLeftRight sa, maxlen1, maxlen2, ds
+    Dim i As Long
     For i = 0 To UBound(sa)
         sa(i) = MString.PadLeftRightDecSep(sa(i), maxlen1, maxlen2, ds)
     Next
