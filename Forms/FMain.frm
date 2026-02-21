@@ -411,7 +411,7 @@ Private Sub BtnTestBMHniths_Click()
 End Sub
 
 Private Sub BtnTestTryParse_Click()
-    Dim b As Byte, i As Integer, L As Long, bo As Boolean, si As Single, d As Double, da As Date, cu As Currency, de As Variant, st As String, arr, v, vt As VbVarType
+    Dim b As Byte, i As Integer, L As Long, bo As Boolean, si As Single, d As Double, da As Date, cu As Currency, de As Variant, st As String, Arr, v, vt As VbVarType
     Dim s As String, sl As String
     s = "123":            If Byte_TryParse(s, b) Then sl = sl & "Datatype of " & s & " is Byte = " & b & vbCrLf
     s = "12345":          If Integer_TryParse(s, i) Then sl = sl & "Datatype of " & s & " is Integer = " & i & vbCrLf
@@ -430,7 +430,7 @@ Private Sub BtnTestTryParse_Click()
     s = "123456789,1234": If Currency_TryParse(s, cu) Then sl = sl & "Datatype of " & s & " is Currency = " & cu & vbCrLf
     s = "123456789012344567890": If Decimal_TryParse(s, de) Then sl = sl & "Datatype of " & s & " is Decimal = " & de & vbCrLf
     s = """This is a string""":  If String_TryParse(s, st) Then sl = sl & "Datatype of " & s & " is String = " & st & vbCrLf
-    s = "Eins" & vbTab & "Zwei" & vbTab & "Drei": If Array_TryParse(s, arr) Then sl = sl & "Datatype of " & s & " is Array = (" & arr(0) & "; " & arr(1) & "; " & arr(2) & ")" & vbCrLf
+    s = "Eins" & vbTab & "Zwei" & vbTab & "Drei": If Array_TryParse(s, Arr) Then sl = sl & "Datatype of " & s & " is Array = (" & Arr(0) & "; " & Arr(1) & "; " & Arr(2) & ")" & vbCrLf
     
     s = "123%": If VBTypeIdentifier_TryParse(s, vt) Then sl = sl & "Datatype of " & s & " is " & VBVarType_ToStr(vt)
                 If CheckType(s, vt, v) Then sl = sl & " = " & v & vbCrLf
@@ -535,7 +535,7 @@ Private Sub BtnTestTryParse_Click()
     'I could be brown,   I could be blue,   I could be violet sky
     'I could be hurtful, I could be purple, I could be anything you like
     
-    Text2.Text = sl
+    Text2.text = sl
 End Sub
 
 Private Sub BtnTestByteOrderMark_Click()
@@ -606,57 +606,57 @@ End Sub
 
 ''' v ############################## v ''' Test 1 ''' v ############################## v '''
 Private Sub BtnResetDeleteMultiWS_Click()
-    Text1.Text = "This string  contains   many    whitespaces     .      With       DeleteMultiWS        only         single          whitespaces           will            remain            .             "
+    Text1.text = "This string  contains   many    whitespaces     .      With       DeleteMultiWS        only         single          whitespaces           will            remain            .             "
 End Sub
 
 Private Sub BtnDeleteMultiWS_Click()
-    Text1.Text = MString.DeleteMultiWS(Text1.Text)
+    Text1.text = MString.DeleteMultiWS(Text1.text)
 End Sub
 
 Private Sub BtnReplaceX_Click()
-    Text1.Text = Replace(Text1.Text, " .", ".")
+    Text1.text = Replace(Text1.text, " .", ".")
 End Sub
 
 ''' v ############################## v ''' Test 2 ''' v ############################## v '''
 Private Sub BtnResetDeleteCRLF_Click()
-    Text2.Text = "This " & vbLf & "string " & vbCr & "contains" & vbCrLf & "many" & vbCrLf & vbCrLf & "Carrier " & vbCr & vbCr & "Return " & vbCrLf & _
+    Text2.text = "This " & vbLf & "string " & vbCr & "contains" & vbCrLf & "many" & vbCrLf & vbCrLf & "Carrier " & vbCr & vbCr & "Return " & vbCrLf & _
                  "and " & vbLf & vbLf & "Line " & vbLf & vbLf & "Feed" & vbCrLf & "with" & vbCrLf & vbCrLf & "DeleteCRLF" & vbCrLf & vbCrLf & "every" & vbCrLf & vbCrLf & _
                  "CR," & vbCrLf & vbCrLf & "LF," & vbCrLf & vbCrLf & "CRLF" & vbCrLf & vbCrLf & "or " & vbLf & vbCr & "LFCR " & vbLf & vbCr & "will " & vbCrLf & vbCrLf & _
                  "be" & vbCrLf & vbCrLf & "replaced" & vbCrLf & vbCrLf & "with" & vbCrLf & vbCrLf & "one" & vbCrLf & vbCrLf & "whitespace."
 End Sub
 
 Private Sub BtnDeleteCRLF_Click()
-    Text2.Text = MString.DeleteCRLF(Text2.Text)
+    Text2.text = MString.DeleteCRLF(Text2.text)
 End Sub
 
 Private Sub BtnDeleteMultiWS2_Click()
-    Text2.Text = MString.DeleteMultiWS(Text2.Text)
+    Text2.text = MString.DeleteMultiWS(Text2.text)
 End Sub
 
 ''' v ############################## v ''' Test 3 ''' v ############################## v '''
 Private Sub BtnResetRemoveChars_Click()
-    Text3.Text = "This \\// string .... contains \././.\ unwanted #### characters ??? ****" & vbCr & vbLf & " every unwanted character will be repalced with a whitespace"
+    Text3.text = "This \\// string .... contains \././.\ unwanted #### characters ??? ****" & vbCr & vbLf & " every unwanted character will be repalced with a whitespace"
 End Sub
 
 Private Sub BtnRemoveChars_Click()
-    Text3.Text = MString.RemoveChars(Text3.Text, "\/?.*#" & vbCr & vbLf)
+    Text3.text = MString.RemoveChars(Text3.text, "\/?.*#" & vbCr & vbLf)
 End Sub
 
 Private Sub BtnDeleteMultiWS3_Click()
-    Text3.Text = MString.DeleteMultiWS(Text3.Text)
+    Text3.text = MString.DeleteMultiWS(Text3.text)
 End Sub
 
 ''' v ############################## v ''' Test 4 ''' v ############################## v '''
 Private Sub BtnResetRecursiveReplace_Click()
-    Text4.Text = "This ws string wsws contains ws the ws word ""w_s"" every wswsws occurance ws of ws ""w_s"" wswsws will ws be ws replaced ws with ws a wswswsws whitespace."
+    Text4.text = "This ws string wsws contains ws the ws word ""w_s"" every wswsws occurance ws of ws ""w_s"" wswsws will ws be ws replaced ws with ws a wswswsws whitespace."
 End Sub
 
 Private Sub BtnRecursiveReplace_Click()
-    Text4.Text = RecursiveReplace(Text4.Text, "ws", " ")
+    Text4.text = RecursiveReplace(Text4.text, "ws", " ")
 End Sub
 
 Private Sub BtnDeleteMultiWS4_Click()
-    Text4.Text = MString.DeleteMultiWS(Text4.Text)
+    Text4.text = MString.DeleteMultiWS(Text4.text)
 End Sub
 
 ''' v ############################## v ''' Test 5 ''' v ############################## v '''
@@ -670,11 +670,11 @@ Private Sub BtnResetPadLeft_Click()
         sa(i) = CStr(Value)
     Next
     Text5.Alignment = AlignmentConstants.vbLeftJustify
-    Text5.Text = Join(sa, vbCrLf)
+    Text5.text = Join(sa, vbCrLf)
 End Sub
 
 Private Sub BtnPadLeft_Click()
-    Dim sa() As String: sa = Split(Text5.Text, vbCrLf)
+    Dim sa() As String: sa = Split(Text5.text, vbCrLf)
     Dim i As Long, maxlen As Long
     For i = 0 To UBound(sa)
         maxlen = Max(maxlen, Len(sa(i)))
@@ -683,7 +683,7 @@ Private Sub BtnPadLeft_Click()
         sa(i) = MString.PadLeft(sa(i), maxlen)
     Next
     Text5.Alignment = AlignmentConstants.vbCenter
-    Text5.Text = Join(sa, vbCrLf)
+    Text5.text = Join(sa, vbCrLf)
 End Sub
 
 ''' v ############################## v ''' Test 6 ''' v ############################## v '''
@@ -697,11 +697,11 @@ Private Sub BtnResetPadRight_Click()
         sa(i) = Format(Value, "0." & String(Rnd * 10, "#"))
     Next
     Text6.Alignment = AlignmentConstants.vbLeftJustify
-    Text6.Text = Join(sa, vbCrLf)
+    Text6.text = Join(sa, vbCrLf)
 End Sub
 
 Private Sub BtnPadRight_Click()
-    Dim sa() As String: sa = Split(Text6.Text, vbCrLf)
+    Dim sa() As String: sa = Split(Text6.text, vbCrLf)
     Dim i As Long, maxlen As Long
     For i = 0 To UBound(sa)
         maxlen = Max(maxlen, Len(sa(i)))
@@ -710,7 +710,7 @@ Private Sub BtnPadRight_Click()
         sa(i) = MString.PadRight(sa(i), maxlen)
     Next
     Text6.Alignment = AlignmentConstants.vbCenter
-    Text6.Text = Join(sa, vbCrLf)
+    Text6.text = Join(sa, vbCrLf)
 End Sub
 
 ''' v ############################## v ''' Test 7 ''' v ############################## v '''
@@ -726,11 +726,11 @@ Private Sub BtnResetPadLeftRight_Click()
         sa(i) = CStr(Value1) & Format(Value2, "." & String(Rnd * 10, "#"))
     Next
     Text7.Alignment = AlignmentConstants.vbLeftJustify
-    Text7.Text = Join(sa, vbCrLf)
+    Text7.text = Join(sa, vbCrLf)
 End Sub
 
 Private Sub BtnPadLeftRight_Click()
-    Dim sa() As String: sa = Split(Text7.Text, vbCrLf)
+    Dim sa() As String: sa = Split(Text7.text, vbCrLf)
     Dim ds As String: ds = GetDecimalSeparator
     Dim i As Long, maxlen1 As Long, maxlen2 As Long
     For i = 0 To UBound(sa)
@@ -739,11 +739,10 @@ Private Sub BtnPadLeftRight_Click()
         maxlen2 = Max(maxlen2, Len(sx(1)))
     Next
     For i = 0 To UBound(sa)
-        sx = Split(sa(i), ds)
-        sa(i) = MString.PadLeft(sx(0), maxlen1) & ds & MString.PadRight(sx(1), maxlen2)
+        sa(i) = MString.PadLeftRightDecSep(sa(i), maxlen1, maxlen2, ds)
     Next
     Text7.Alignment = AlignmentConstants.vbCenter
-    Text7.Text = Join(sa, vbCrLf)
+    Text7.text = Join(sa, vbCrLf)
 End Sub
 
 ''' v ############################## v ''' Test 8 ''' v ############################## v '''
@@ -757,11 +756,11 @@ Private Sub BtnResetPadCentered_Click()
         sa(i) = CStr(Value)
     Next
     Text8.Alignment = AlignmentConstants.vbLeftJustify
-    Text8.Text = Join(sa, vbCrLf)
+    Text8.text = Join(sa, vbCrLf)
 End Sub
 
 Private Sub BtnPadCentered_Click()
-    Dim sa() As String: sa = Split(Text8.Text, vbCrLf)
+    Dim sa() As String: sa = Split(Text8.text, vbCrLf)
     Dim ds As String: ds = GetDecimalSeparator
     Dim i As Long, maxlen As Long ', maxlen2 As Long
     For i = 0 To UBound(sa)
@@ -774,5 +773,5 @@ Private Sub BtnPadCentered_Click()
         sa(i) = MString.PadCentered(sa(i), maxlen) '& ds & MString.PadRight(sx(1), maxlen2)
     Next
     Text8.Alignment = AlignmentConstants.vbCenter
-    Text8.Text = Join(sa, vbCrLf)
+    Text8.text = Join(sa, vbCrLf)
 End Sub

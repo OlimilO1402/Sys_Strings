@@ -762,15 +762,15 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
-Public Function Array_ToStr(arr) As String
+Public Function Array_ToStr(Arr) As String
     Dim i As Long, s As String: s = "("
-    If IsObject(arr(0)) Then
-        For i = LBound(arr) To UBound(arr)
-            s = s & arr(i).ToStr & "; "
+    If IsObject(Arr(0)) Then
+        For i = LBound(Arr) To UBound(Arr)
+            s = s & Arr(i).ToStr & "; "
         Next
     Else
-        For i = LBound(arr) To UBound(arr)
-            s = s & CStr(arr(i)) & "; "
+        For i = LBound(Arr) To UBound(Arr)
+            s = s & CStr(Arr(i)) & "; "
         Next
     End If
     Array_ToStr = s & ")"
@@ -1717,6 +1717,12 @@ Function PadRight(this As String, ByVal totalWidth As Long, Optional ByVal paddi
             PadRight = this
         End If
     End If
+End Function
+
+Function PadLeftRightDecSep(this As String, ByVal totalWidthLeft As Long, ByVal totalWidthRight As Long, Optional ByVal DecimalSep As String = "", Optional ByVal paddingChar As String) As String
+    If Len(DecimalSep) = 0 Then DecimalSep = GetDecimalSeparator
+    Dim sx() As String: sx = Split(this, DecimalSep)
+    PadLeftRightDecSep = MString.PadLeft(sx(0), totalWidthLeft, paddingChar) & DecimalSep & MString.PadRight(sx(1), totalWidthRight, paddingChar)
 End Function
 
 'Public Function PadLeft2(StrVal As String, _
