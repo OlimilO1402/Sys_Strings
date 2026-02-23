@@ -522,35 +522,51 @@ Public Function Long_TryParseValidate(ByVal NewValue As String, ByVal mess As St
 End Function
 
 #If VBA7 Then
-Public Function LongLong_TryParse(ByVal Value As String, ByRef Value_out As LongLong) As Boolean
-Try: On Error GoTo Catch
-    Value_out = CLng(Value)
-    Long_TryParse = True
-    Exit Function
+    Public Function LongLong_TryParse(ByVal Value As String, ByRef Value_out As LongLong) As Boolean
+Try:     On Error GoTo Catch
+        Value_out = CLng(Value)
+        LongLong_TryParse = True
+        Exit Function
 Catch:
-End Function
+    End Function
+#Else
+    Public Function LongLong_TryParse(ByVal Value As String, ByRef Value_out As Currency) As Boolean
+Try:    On Error GoTo Catch
+        Value_out = CCur(Value)
+        LongLong_TryParse = True
+        Exit Function
+Catch:
+    End Function
+#End If
 
-Public Function LongLong_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As LongLong) As Boolean
-    LongLong_TryParseMess = LongLong_TryParse(Value, Value_inout)
-    If Not LongLong_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbLongLong))
-End Function
+#If VBA7 Then
+    Public Function LongLong_TryParseMess(ByVal Value As String, ByVal mess As String, ByRef Value_inout As LongLong) As Boolean
+        LongLong_TryParseMess = LongLong_TryParse(Value, Value_inout)
+        If Not LongLong_TryParseMess Then MsgBox Replace(Replace(mess, "<value>", Value), "<datatype>", VBVarType_ToStr(VbVarType.vbLongLong))
+    End Function
+#Else
+    '
+#End If
 
-Public Function LongLong_TryParseValidate(ByVal NewValue As String, ByVal mess As String, ByVal sFormat As String, ByRef bIsOK_out As Boolean, ByRef OldValueIn_NewValueOut As LongLong) As String
-    bIsOK_out = LongLong_TryParse(NewValue, OldValueIn_NewValueOut)
-    If bIsOK_out Then
-        'OldValueIn_NewValueOut now has changed to the new value because user gave a valid value in NewValue
+#If VBA7 Then
+    Public Function LongLong_TryParseValidate(ByVal NewValue As String, ByVal mess As String, ByVal sFormat As String, ByRef bIsOK_out As Boolean, ByRef OldValueIn_NewValueOut As LongLong) As String
+        bIsOK_out = LongLong_TryParse(NewValue, OldValueIn_NewValueOut)
+        If bIsOK_out Then
+            'OldValueIn_NewValueOut now has changed to the new value because user gave a valid value in NewValue
+            LongLong_TryParseValidate = IIf(Len(sFormat), Format(OldValueIn_NewValueOut, sFormat), OldValueIn_NewValueOut)
+            Exit Function
+        End If
+        mess = mess & IIf(Len(mess), vbCrLf, "") & Replace(Replace(m_ValidateMsg, "<value>", NewValue), "<datatype>", VBVarType_ToStr(VbVarType.vbLongLong))
+        If MsgBox(mess, vbOKCancel) = VbMsgBoxResult.vbOK Then
+            'give back the users faulty new value, so user gets the chance to correct it
+            LongLong_TryParseValidate = NewValue
+            Exit Function
+        End If
+        'give back the valid  old value, at least it was a valid Double value
         LongLong_TryParseValidate = IIf(Len(sFormat), Format(OldValueIn_NewValueOut, sFormat), OldValueIn_NewValueOut)
-        Exit Function
-    End If
-    mess = mess & IIf(Len(mess), vbCrLf, "") & Replace(Replace(m_ValidateMsg, "<value>", NewValue), "<datatype>", VBVarType_ToStr(VbVarType.vbLongLong))
-    If MsgBox(mess, vbOKCancel) = VbMsgBoxResult.vbOK Then
-        'give back the users faulty new value, so user gets the chance to correct it
-        LongLong_TryParseValidate = NewValue
-        Exit Function
-    End If
-    'give back the valid  old value, at least it was a valid Double value
-    LongLong_TryParseValidate = IIf(Len(sFormat), Format(OldValueIn_NewValueOut, sFormat), OldValueIn_NewValueOut)
-End Function
+    End Function
+#Else
+    '
 #End If
 
 Public Function Single_TryParse(ByVal Value As String, ByRef Value_out As Single) As Boolean
@@ -1089,6 +1105,11 @@ Public Function Bin_ToStr(ByVal Value) As String
     Case VbVarType.vbByte:     s = s & Bin8(CByte(Value))
     Case VbVarType.vbInteger:  s = s & Bin16(CInt(Value))
     Case VbVarType.vbLong:     s = s & Bin32(CLng(Value))
+#If VBA7 Then
+    Case VbVarType.vbLongLong: s = s & Bin64(CLngLng(Value))
+#Else
+    Case 20:                   s = s & Bin64(CCur(Value))
+#End If
     Case VbVarType.vbCurrency: s = s & Bin64(CCur(Value))
     Case VbVarType.vbDecimal:  's = s & Bin96(CDec(Value))
                                's = s & Bin96(CCur(Value))
@@ -1107,6 +1128,12 @@ Public Function CheckType(ByVal s As String, ByVal vt As VbVarType, Value_out) A
     Case VbVarType.vbInteger:     Dim IntVal As Integer:  CheckType = Integer_TryParse(s, IntVal):   Value_out = IntVal
     Case VbVarType.vbBoolean:     Dim BolVal As Boolean:  CheckType = Boolean_TryParse(s, BolVal):   Value_out = BolVal
     Case VbVarType.vbLong:        Dim LngVal As Long:     CheckType = Long_TryParse(s, LngVal):      Value_out = LngVal
+    Case 20:
+#If VBA7 Then
+    Case VbVarType.vbLongLong:    Dim LLngV As LongLong:  CheckType = LongLong_TryParse(s, LLngV):   Value_out = LLngV
+#Else
+    Case 20:                      Dim LLngV As Currency:  CheckType = LongLong_TryParse(s, LLngV):   Value_out = LLngV
+#End If
     Case VbVarType.vbSingle:      Dim SngVal As Single:   CheckType = Single_TryParse(s, SngVal):    Value_out = SngVal
     Case VbVarType.vbDouble:      Dim DblVal As Double:   CheckType = Double_TryParse(s, DblVal):    Value_out = DblVal
     Case VbVarType.vbCurrency:    Dim CurVal As Currency: CheckType = Currency_TryParse(s, CurVal):  Value_out = CurVal
@@ -1123,7 +1150,11 @@ Public Function VBVarType_TryParse(ByVal s As String, vt_out As VbVarType) As Bo
     Select Case s
     Case "INTEGER":         vt_out = VbVarType.vbInteger
     Case "LONG":            vt_out = VbVarType.vbLong
+#If VBA7 Then
+    Case "LONGLONG":        vt_out = VbVarType.vbLongLong
+#Else
     Case "LONGLONG":        vt_out = 20 'VbVarType.vbLongLong
+#End If
     Case "SINGLE":          vt_out = VbVarType.vbSingle
     Case "DOUBLE":          vt_out = VbVarType.vbDouble
     Case "CURRENCY":        vt_out = VbVarType.vbCurrency
@@ -1158,6 +1189,11 @@ Public Function VBVarType_ToStr(ByVal vt As VbVarType) As String
     Case VbVarType.vbNull:            s = "Null" & s        ' =  1
     Case VbVarType.vbInteger:         s = "Integer" & s     ' =  2
     Case VbVarType.vbLong:            s = "Long" & s        ' =  3
+#If VBA7 Then
+    Case VbVarType.vbLongLong:        s = "LongLong" & s    ' =  20
+#Else
+    Case 20:                          s = "LongLong" & s    ' =  20
+#End If
     Case VbVarType.vbSingle:          s = "Single" & s      ' =  4
     Case VbVarType.vbDouble:          s = "Double" & s      ' =  5
     Case VbVarType.vbCurrency:        s = "Currency" & s    ' =  6
@@ -1182,6 +1218,11 @@ Public Function VBVarType_IsNumeric(ByVal vt As VbVarType) As Boolean
     Case vt And VbVarType.vbByte:     VBVarType_IsNumeric = True
     Case vt And VbVarType.vbInteger:  VBVarType_IsNumeric = True
     Case vt And VbVarType.vbLong:     VBVarType_IsNumeric = True
+#If VBA7 Then
+    Case vt And VbVarType.vbLongLong: VBVarType_IsNumeric = True '20
+#Else
+    Case vt And 20:                   VBVarType_IsNumeric = True 'vbLongLong
+#End If
     Case vt And VbVarType.vbSingle:   VBVarType_IsNumeric = True
     Case vt And VbVarType.vbDouble:   VBVarType_IsNumeric = True
     Case vt And VbVarType.vbCurrency: VBVarType_IsNumeric = True
@@ -1235,6 +1276,8 @@ Public Function VBTypeIdentifier_TryParse(ByVal s As String, vt_out As VbVarType
     Case "&": vt_out = VbVarType.vbLong:     b = True
 #If VBA7 Then
     Case "^": vt_out = VbVarType.vbLongLong: b = True
+#Else
+    Case "^": vt_out = 20:                   b = True
 #End If
     Case "@": vt_out = VbVarType.vbCurrency: b = True
     Case "!": vt_out = VbVarType.vbSingle:   b = True
@@ -1250,7 +1293,9 @@ Public Function VBTypeIdentifier_ToStr(ByVal vtid As VbVarType) As String
     Case VbVarType.vbInteger:  s = "%"
     Case VbVarType.vbLong:     s = "&"
 #If VBA7 Then
-    Case VbVarType.vbLongLong: s = "^"
+    Case VbVarType.vbLongLong: s = "^" 'just for completenesss reasons
+#Else
+    Case 20:                   s = "^" '20 works either way, so we could also just use 20
 #End If
     Case VbVarType.vbCurrency: s = "@"
     Case VbVarType.vbSingle:   s = "!"
@@ -1721,12 +1766,15 @@ End Function
 
 Public Sub GetMaxLenLeftRight(Numbers() As String, maxLenLeft_out As Long, maxLenRight_out As Long, Optional ByVal DecSeparator As String = "")
     If Len(DecSeparator) = 0 Then DecSeparator = GetDecimalSeparator
-    Dim i As Long, maxlen1 As Long, maxlen2 As Long
+    Dim i As Long, s As String, maxlen1 As Long, maxlen2 As Long
     For i = 0 To UBound(Numbers)
-        Dim sx() As String: sx = Split(Numbers(i), DecSeparator)
-        Dim u As Long: u = UBound(sx)
-        maxlen1 = Max(maxlen1, Len(sx(0)))
-        If u > 0 Then maxlen2 = Max(maxlen2, Len(sx(1)))
+        s = Numbers(i)
+        If Len(s) Then
+            Dim sx() As String: sx = Split(s, DecSeparator)
+            Dim u As Long: u = UBound(sx)
+            maxlen1 = Max(maxlen1, Len(sx(0)))
+            If u > 0 Then maxlen2 = Max(maxlen2, Len(sx(1)))
+        End If
     Next
     maxLenLeft_out = maxlen1
     maxLenRight_out = maxlen2
