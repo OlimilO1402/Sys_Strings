@@ -1483,7 +1483,7 @@ Public Function Hex8(ByVal Value As Long) As String
 End Function
 
 Public Function Hex16(ByVal Value As Currency) As String
-    Dim tc As TCur:  tc.Value = Value
+    Dim tc As TCurrency:  tc.Value = Value
     Dim tl As TLong2: LSet tl = tc
     Hex16 = Hex8(tl.Hi) & Hex8(tl.Lo)
 End Function
@@ -1505,7 +1505,7 @@ Public Function Oct11(ByVal Value As Long) As String
 End Function
 
 Public Function Oct22(ByVal Value As Currency) As String
-    Dim tc As TCur:  tc.Value = Value
+    Dim tc As TCurrency:  tc.Value = Value
     Dim tl As TLong2: LSet tl = tc
     Oct22 = Oct11(tl.Hi) & Oct11(tl.Lo) 'no this does not work
 End Function
@@ -1536,7 +1536,7 @@ Public Function Bin32(ByVal Value As Long) As String
 End Function
 
 Public Function Bin64(ByVal Value As Currency) As String
-    Dim tc As TCur:  tc.Value = Value
+    Dim tc As TCurrency:  tc.Value = Value
     Dim tl As TLong2: LSet tl = tc
     Bin64 = Bin32(tl.Hi) & Bin32(tl.Lo)
 End Function
@@ -1806,18 +1806,18 @@ End Function
 
 Public Sub GetMaxLenLeftRight(Numbers() As String, maxLenLeft_out As Long, maxLenRight_out As Long, Optional ByVal DecSeparator As String = "")
     If Len(DecSeparator) = 0 Then DecSeparator = GetDecimalSeparator
-    Dim i As Long, s As String, maxlen1 As Long, maxlen2 As Long
+    Dim i As Long, s As String, maxLen1 As Long, maxLen2 As Long
     For i = 0 To UBound(Numbers)
         s = Numbers(i)
         If Len(s) Then
             Dim sx() As String: sx = Split(s, DecSeparator)
             Dim u As Long: u = UBound(sx)
-            maxlen1 = Max(maxlen1, Len(sx(0)))
-            If u > 0 Then maxlen2 = Max(maxlen2, Len(sx(1)))
+            maxLen1 = Max(maxLen1, Len(sx(0)))
+            If u > 0 Then maxLen2 = Max(maxLen2, Len(sx(1)))
         End If
     Next
-    maxLenLeft_out = maxlen1
-    maxLenRight_out = maxlen2
+    maxLenLeft_out = maxLen1
+    maxLenRight_out = maxLen2
 End Sub
 
 Function PadLeftRightDecSep(this As String, ByVal totalWidthLeft As Long, ByVal totalWidthRight As Long, Optional ByVal DecimalSep As String = "", Optional ByVal paddingChar As String) As String
